@@ -15,23 +15,67 @@ class CrowdInputsModel extends BaseModel {
   }
 
   /**
+   * @method getApprovedByItem
+   * @description get all approved crowd inputs by item
+   * 
+   * @param {String} id item id
+   */
+  getApprovedByItem(id) {
+    let approved = this.store.getApprovedByItem(id) || {};
+
+    try {
+      if( approved.request ) {
+        await approved.request;
+      } else {
+        await this.service.getApprovedByItem(id);
+      }
+    } catch(e) {}
+
+    return this.store.getApprovedByItem(id);
+  }
+
+  /**
    * @method getApproved
    * @description get approved crowd inputs for a item
    * 
    * @param {String} id item id
    */
   getApproved(id) {
+    let approved = this.store.getApproved(id) || {};
 
+    try {
+      if( approved.request ) {
+        await approved.request;
+      } else {
+        await this.service.getApproved(id);
+      }
+    } catch(e) {}
+
+    return this.store.getApproved(id);
   }
 
   /**
    * @method setApproved
    * @description Admin only. set crowd input as approved.  
+   * Moves mark from Firestore to PGR
    * 
    * @param {String} id 
    */
-  setApproved(id) {
+  async setApproved(id) {
+    let crowdInput = await this.getPending(id);
+    if( crowdInput.state === this.store.STATE.ERROR ) {
+      throw crowdInput.error;
+    }
 
+    // change id for pgr
+    crowdInput.crowd_input_id = crowdInput.id;
+    delete crowdInput.id;
+
+    try {
+      await this.service.setApproved(crowdInput);
+    } catch(e) {}
+
+    return this.store.getApproved(id);
   }
 
   /**
@@ -91,7 +135,9 @@ class CrowdInputsModel extends BaseModel {
     } else if( !noCache && pendingInput.state === this.store.STATE.LOADED ) {
       return pendingInput;
     } else {
-      await this.service.getPending(id);
+      try {
+        await this.service.getPending(id);
+      } catch(e) {}
     }
 
     this.store.getPending(id);

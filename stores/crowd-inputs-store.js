@@ -5,6 +5,11 @@ class CrowdInputsStore extends BaseStore {
   constructor() {
     super();
 
+    this.CUSTOM_STATES = {
+      APPROVING : 'approving',
+      APPROVED : 'approved'
+    }
+
     this.data = {
       pending : {
         byItem : {},
@@ -19,9 +24,94 @@ class CrowdInputsStore extends BaseStore {
     }
 
     this.events = {
-      CROWD_INPUT_DATA_UPDATE : 'crowd-input-data-update',
-      ITEM_CROWD_INPUT_DATA_UPDATE : 'item-crowd-input-data-update'
+      PENDING_CROWD_INPUT_DATA_UPDATE : 'pending-crowd-input-data-update',
+      PENDING_ITEM_CROWD_INPUT_DATA_UPDATE : 'pending-item-crowd-input-data-update',
+      APPROVED_CROWD_INPUT_DATA_UPDATE : 'approved-crowd-input-data-update',
+      APPROVED_ITEM_CROWD_INPUT_DATA_UPDATE : 'approved-item-crowd-input-data-update'
     }
+  }
+
+  // APPROVED
+  getApproved(id) {
+    return this.data.approved.byId[id]  
+  }
+
+  setApprovedLoading(id, promise) {
+    this._setApprovedState({
+      id,
+      request : promise,
+      state: this.STATE.LOADING
+    });
+  }
+
+  setApprovedLoaded(id, payload) {
+    this._setApprovedState({
+      id, payload,
+      state: this.STATE.LOADED
+    });
+  }
+
+  setApprovedError(id, error) {
+    this._setApprovedState({
+      id, error,
+      state: this.STATE.ERROR
+    });
+  }
+
+  _setApprovedState(newState) {
+    let oldState = this.getPendingByItem(newState.id);
+    if( !this.stateChanged(oldState, newState) ) {
+      return;
+    }
+    this.data.approved.byId[newState.id] = newState;
+    this.emit(this.events.APPROVED_CROWD_INPUT_DATA_UPDATE, newState);
+  }
+
+  // APPROVED BY ITEM
+  getApprovedByItem(id) {
+    return this.data.approved.byItem[id];  
+  }
+
+  setApprovedByItemLoading(id, promise) {
+    this._setApprovedByItemState({
+      id,
+      request : promise,
+      state: this.STATE.LOADING
+    });
+  }
+
+  setApprovedByItemLoaded(id, payload) {
+    this._setApprovedByItemState({
+      id, payload,
+      state: this.STATE.LOADED
+    });
+  }
+
+  setApprovedByItemError(id, error) {
+    this._setApprovedByItemState({
+      id, error,
+      state: this.STATE.ERROR
+    });
+  }
+
+  mergeApprovedIntoItem(id, docs) {
+    // merge with current state of marks
+    let currentDocs = this.getApprovedByItem(id) || {};
+    if( currentDocs.state === 'loaded' )  {
+      currentDocs = currentDocs.payload;
+    }
+    docs = Object.assign({}, currentDocs, docs);
+
+    this.setApprovedByItemLoaded(id, docs);
+  }
+
+  _setApprovedByItemState(newState) {
+    let oldState = this.getPendingByItem(newState.id);
+    if( !this.stateChanged(oldState, newState) ) {
+      return;
+    }
+    this.data.approved.byId[newState.id] = newState;
+    this.emit(this.events.APPROVED_ITEM_CROWD_INPUT_DATA_UPDATE, newState);
   }
 
   // PENDING BY ITEM
@@ -76,12 +166,66 @@ class CrowdInputsStore extends BaseStore {
       return;
     }
     this.data.pending.byItem[newState.id] = newState;
-    this.emit(this.events.ITEM_CROWD_INPUT_DATA_UPDATE, newState);
+    this.emit(this.events.PENDING_ITEM_CROWD_INPUT_DATA_UPDATE, newState);
   }
 
   // PENDING
   getPending(id) {
     return this.data.pending.byId[id];
+  }
+
+  setPendingApproving(data, promise) {
+    this._setPendingState({
+      id : data.id,
+      payload : data,
+      request : promise,
+      state: this.CUSTOM_STATES.APPROVING
+    });
+  }
+
+  setPendingApproved(data, body) {
+    this._setPendingState({
+      id : data.id,
+      payload : data,
+      body,
+      state: this.CUSTOM_STATES.APPROVED
+    });
+  }
+
+  setPendingDeleting(id, promise) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(id) || {};
+
+    this._setPendingState({
+      id,
+      payload : currentState.payload,
+      request : promise,
+      state: this.STATE.DELETING
+    });
+  }
+
+  setPendingDeleted(id) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(id) || {};
+
+    this._setPendingState({
+      id,
+      deleted : true,
+      payload : currentState.payload,
+      request : promise,
+      state: this.STATE.LOADED
+    });
+  }
+
+  setPendingDeleteError(id, error) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(id) || {};
+
+    this._setPendingState({
+      id, error,
+      payload : currentState.payload,
+      state: this.STATE.DELETE_ERROR
+    });
   }
 
   setPendingSaving(data, promise) {
@@ -130,7 +274,7 @@ class CrowdInputsStore extends BaseStore {
       return;
     }
     this.data.pending.byId[newState.id] = newState;
-    this.emit(this.events.CROWD_INPUT_DATA_UPDATE, newState);
+    this.emit(this.events.PENDING_CROWD_INPUT_DATA_UPDATE, newState);
   }
 
   // unsubscribe
