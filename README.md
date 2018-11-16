@@ -7,11 +7,11 @@ JS library for interacting with UCD library crowd source databases.  Including c
 
 # Method Overview
 
-Crowd Inputs
+## Crowd Inputs
 - get approved by item (PGR)
   - gets all approved inputs for item
-- get approved by id (PRG)
-- set approved (PRG/Firestore)
+- get approved by id (PGR)
+- set approved (PGR/Firestore)
   - add input to pgr, remove from firestore
 - add pending (Firestore)
   - add pending input to firestore
@@ -23,7 +23,7 @@ Crowd Inputs
 - unlisten pending by item (Firestores)
   - stop listing to push update of inputs for item
 
-Items
+## Items
 - get by id (ElasticSearch)
 - search (ElasticSearch)
   - supports text, filters, limit, offsets, etc
