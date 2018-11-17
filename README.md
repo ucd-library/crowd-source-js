@@ -73,7 +73,7 @@ Firebase has several authentication methods but the JWT token method is recommen
 }
 ```
 
-You should use the firebase-admin library with Google/Firebase Service Account to mint the tokens.  Once firebase is authenticated with the token, no further action is required.
+You should use the firebase-admin library with a Google/Firebase Service Account to mint the tokens.  Once firebase is authenticated with the token, no further action is required.
 
 ```js
 const admin = require('firebase-admin');
