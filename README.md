@@ -16,6 +16,12 @@ JS library for interacting with UCD library crowd source databases.  Including c
   - add input to pgr, remove from firestore
 - add pending (Firestore)
   - add pending input to firestore
+- remove pending (Firestore)
+  - remove a pending crowd input.  
+  - Must be admin or owned by user
+- update pending (Firestore)
+  - update a pending crowd input.  
+  - Must be admin or owned by user
 - get pending (Firestore)
 - get pending by item (Firestore)
   - get all pending inputs for item

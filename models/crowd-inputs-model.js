@@ -100,6 +100,10 @@ class CrowdInputsModel extends BaseModel {
     return this.store.getPending(id);
   }
 
+  async updatePending(crowdInput) {
+    // TODO
+  }
+
   /**
    * @method addPending
    * @description add a pending crowd input
