@@ -3,10 +3,12 @@ const CrowdInputsService = require('../services/crowd-inputs-service');
 const CrowdInputsStore = require('../stores/crowd-inputs-store');
 const uuid = require('uuid');
 const config = require('../config');
+const clone = require('clone');
 
 class CrowdInputsModel extends BaseModel {
 
   constructor() {
+    super();
 
     this.service = CrowdInputsService;
     this.store = CrowdInputsStore;
@@ -20,7 +22,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @param {String} id item id
    */
-  getApprovedByItem(id) {
+  async getApprovedByItem(id) {
     let approved = this.store.getApprovedByItem(id) || {};
 
     try {
@@ -40,7 +42,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @param {String} id item id
    */
-  getApproved(id) {
+  async getApproved(id) {
     let approved = this.store.getApproved(id) || {};
 
     try {
@@ -60,22 +62,42 @@ class CrowdInputsModel extends BaseModel {
    * Moves mark from Firestore to PGR
    * 
    * @param {String} id 
+   * @param {String} schema schema type.  Required for PGR which will validate the crowdInput.data object
+   * @param {String} jwt pgr admin jwt
    */
-  async setApproved(id) {
+  async setApproved(id, schema, jwt) {
     let crowdInput = await this.getPending(id);
     if( crowdInput.state === this.store.STATE.ERROR ) {
       throw crowdInput.error;
     }
 
     // change id for pgr
+    crowdInput = clone(crowdInput.payload);
     crowdInput.crowd_input_id = crowdInput.id;
+    crowdInput.data['@schema'] = schema;
     delete crowdInput.id;
 
     try {
-      await this.service.setApproved(crowdInput);
+      await this.service.setApproved(crowdInput, jwt);
     } catch(e) {}
 
     return this.store.getApproved(id);
+  }
+
+  /**
+   * @method removePending
+   * @description remove a pending crowd input.  can be called by admin or owner of input
+   * 
+   * @param {String} id crowd input id
+   *
+   * @returns {Promise} 
+   */
+  async removePending(id) {
+    try {
+      await this.service.removePending(id);
+    } catch(e) {}
+
+    return this.store.getPending(id);
   }
 
   /**
@@ -92,7 +114,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @return {Promise}
    */
-  addPending(crowdInput) {
+  async addPending(crowdInput) {
     crowdInput.id = uuid.v4();
     
     if( !crowdInput.collectionId ) {
@@ -112,7 +134,11 @@ class CrowdInputsModel extends BaseModel {
       throw new Error('data required');
     }
 
-    return this.service.addPending(crowdInput);
+    try {
+      await this.service.addPending(crowdInput);
+    } catch(e) {}
+
+    return this.store.getPending(crowdInput.id);
   }
 
   /**
@@ -127,7 +153,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @return {Object} current state object
    */
-  getPending(id, noCache=false) {
+  async getPending(id, noCache=false) {
     let pendingInput = this.store.getPending(id) || {};
 
     if( pendingInput.request ) {
@@ -149,7 +175,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @param {String} id item id
    */
-  getPendingByItem(id) {
+  async getPendingByItem(id) {
     let state = this.store.getPendingByItem(id) || {};
     
     if( state.request ) {

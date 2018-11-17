@@ -1,5 +1,5 @@
 const {BaseService} = require('@ucd-lib/cork-app-utils');
-const CrowdInputsStore = require('../stores/CrowdInputsStore');
+const CrowdInputsStore = require('../stores/crowd-inputs-store');
 const firestore = require('../lib/firestore');
 const config = require('../config');
 
@@ -13,7 +13,7 @@ class CrowdInputsService extends BaseService {
   }
 
   getApprovedByItem(id) {
-    await this.request({
+    return this.request({
       url : `${config.pgr.host}/crowd_inputs?item_id=eq.${id}`,
       onLoading : request => this.store.setApprovedByItemLoading(id, request),
       onLoad : response => {
@@ -39,7 +39,7 @@ class CrowdInputsService extends BaseService {
    * we want to just store the loaded state
    */
   getApproved(id, onlySuccessState=false) {
-    await this.request({
+    return this.request({
       url : `${config.pgr.host}/crowd_inputs?crowd_inputs_id=eq.${id}`,
       onLoading : request => {
         if( onlySuccessState ) return;
@@ -68,13 +68,14 @@ class CrowdInputsService extends BaseService {
     });
   }
 
-  setApproved(crowdInput) {
+  async setApproved(crowdInput, jwt) {
     await this.request({
       url : `${config.pgr.host}/crowd_inputs`,
       json : true,
       fetchOptions : {
         method: 'POST',
         headers : {
+          Authorization : `Bearer ${jwt}`,
           'Content-Type': 'application/json'
         },
         body: crowdInput
@@ -242,4 +243,4 @@ class UpdateBuffer {
   }
 }
 
-module.exports = CrowdInputsService();
+module.exports = new CrowdInputsService();

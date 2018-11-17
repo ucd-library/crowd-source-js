@@ -10,7 +10,13 @@
   "license": "MIT",
   "dependencies": {
     "@ucd-lib/cork-app-utils": "^4.1.2",
+    "clone": "^2.1.2",
     "firebase": "^5.5.8",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "firebase-admin": "^6.1.0",
+    "jsonwebtoken": "^8.4.0",
+    "mocha": "^5.2.0"
   }
 }
