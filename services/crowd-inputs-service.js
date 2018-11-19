@@ -82,7 +82,7 @@ class CrowdInputsService extends BaseService {
       },
       onLoading : request => this.store.setPendingApproving(crowdInput, request),
       onLoad : response => this.store.setPendingApproved(crowdInput, response.body),
-      onError : error => this.store.setPendingLoaded(id, crowdInputs)
+      onError : error => this.store.setPendingError(id, error)
     });
 
     await this.removePending(id);
@@ -110,17 +110,24 @@ class CrowdInputsService extends BaseService {
     }
   }
 
-  async addPending(crowdInput) {
+  async updatePending(crowdInput) {
     try {
       // setup firebase save 
       let promise = firestore.db
         .collection(this.collection)
         .doc(crowdInput.id)
-        .set(crowdInput);
+        .set(crowdInput, {merge: true});
 
       // set saving state and wait for save to complete
       this.store.setPendingSaving(crowdInput, promise);
       await promise;
+
+      // fetch the current state of document
+      let ref = await firestore.db
+        .collection(this.collection)
+        .doc(crowdInput.id)
+        .get();
+      crowdInput = ref.data();
 
       // set loaded state
       this.store.setPendingLoaded(crowdInput.id, crowdInput);
@@ -131,7 +138,7 @@ class CrowdInputsService extends BaseService {
         {[crowdInput.id]: crowdInput}
       );
     } catch(e) {
-      this.store.setPendingSaveError(crowdInput.id, e);
+      this.store.setPendingSaveError(crowdInput, e);
       throw e;
     }
   }

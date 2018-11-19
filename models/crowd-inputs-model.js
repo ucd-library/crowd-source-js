@@ -100,8 +100,31 @@ class CrowdInputsModel extends BaseModel {
     return this.store.getPending(id);
   }
 
+  /**
+   * @method updatePending
+   * @description update a pending crowd input.  You must set the userId
+   * parameter or the user must be an admin!
+   * 
+   * @param {Object} crowdInput
+   * @param {String} crowdInput.collectionId
+   * @param {String} crowdInput.userId
+   * @param {Boolean} crowdInput.anonymous
+   * @param {String} crowdInput.appId
+   * @param {String} crowdInput.itemId
+   * @param {Object} crowdInput.data
+   * 
+   * @return {Promise}
+   */
   async updatePending(crowdInput) {
-    // TODO
+    if( !crowdInput.id ) {
+      throw new Error('Crowd input id required');
+    }
+
+    try {
+      await this.service.updatePending(crowdInput);
+    } catch(e) {}
+
+    return this.store.getPending(crowdInput.id);
   }
 
   /**
@@ -139,7 +162,7 @@ class CrowdInputsModel extends BaseModel {
     }
 
     try {
-      await this.service.addPending(crowdInput);
+      await this.service.updatePending(crowdInput);
     } catch(e) {}
 
     return this.store.getPending(crowdInput.id);

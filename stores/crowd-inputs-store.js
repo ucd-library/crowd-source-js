@@ -175,18 +175,26 @@ class CrowdInputsStore extends BaseStore {
   }
 
   setPendingApproving(data, promise) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(data.id) || {};
+
     this._setPendingState({
       id : data.id,
-      payload : data,
+      payload : currentState.payload,
+      approvePayload : data,
       request : promise,
       state: this.CUSTOM_STATES.APPROVING
     });
   }
 
   setPendingApproved(data, body) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(data.id) || {};
+
     this._setPendingState({
       id : data.id,
-      payload : data,
+      payload : currentState.payload,
+      approvePayload : data,
       body,
       state: this.CUSTOM_STATES.APPROVED
     });
@@ -212,7 +220,6 @@ class CrowdInputsStore extends BaseStore {
       id,
       deleted : true,
       payload : currentState.payload,
-      request : promise,
       state: this.STATE.LOADED
     });
   }
@@ -229,26 +236,38 @@ class CrowdInputsStore extends BaseStore {
   }
 
   setPendingSaving(data, promise) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(data.id) || {};
+
     this._setPendingState({
       id : data.id,
-      payload : data,
+      payload : currentState.payload,
+      savePayload : data,
       request : promise,
       state: this.STATE.SAVING
     });
   }
 
   setPendingSaveError(data, error) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(data.id) || {};
+
     this._setPendingState({
       id : data.id, 
-      payload : data,
+      payload : currentState.payload,
+      savePayload : data,
       error,
       state: this.STATE.SAVE_ERROR
     });
   }
 
   setPendingLoading(id, promise) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(id) || {};
+
     this._setPendingState({
       id,
+      payload : currentState.payload,
       request : promise,
       state: this.STATE.LOADING
     });
@@ -262,8 +281,12 @@ class CrowdInputsStore extends BaseStore {
   }
 
   setPendingError(id, error) {
+    // keep track of current payload if we have it
+    let currentState = this.getPending(id) || {};
+
     this._setPendingState({
       id, error,
+      payload : currentState.payload,
       state: this.STATE.ERROR
     });
   }

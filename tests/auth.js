@@ -38,16 +38,19 @@ class AuthUtils {
   async init() {
     global.Users = {
       alice : {
-        firestore : await this.createFirestoreJwt('alice', 'alice@test.com'),
-        pgr : this.createPgrJwt('alice', '')
+        userId : 'alice@test.org',
+        firestoreJwt : await this.createFirestoreJwt('alice@test.org', 'alice@test.org'),
+        pgrJwt : this.createPgrJwt('alice@test.org', '')
       },
       bob : {
-        firestore : await this.createFirestoreJwt('bob', 'bob@test.com'),
-        pgr : this.createPgrJwt('bob', '')
+        userId : 'bob@test.org',
+        firestoreJwt : await this.createFirestoreJwt('bob@test.org', 'bob@test.org'),
+        pgrJwt : this.createPgrJwt('bob@test.org', '')
       },
       admin : {
-        firestore : await this.createFirestoreJwt('testing-admin', 'testing-admin@test.com', true),
-        pgr : this.createPgrJwt('testing-admin', 'admin')
+        userId : 'admin@test.org',
+        firestoreJwt : await this.createFirestoreJwt('admin@test.org', 'admin@test.org', true),
+        pgrJwt : this.createPgrJwt('admin@test.org', 'admin')
       }
     }
   }

@@ -17,6 +17,7 @@
   "devDependencies": {
     "firebase-admin": "^6.1.0",
     "jsonwebtoken": "^8.4.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "request": "^2.88.0"
   }
 }
