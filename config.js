@@ -11,7 +11,8 @@ module.exports = {
   firestore : {
     projectId : 'price-the-vintage-dams',
     collections : {
-      crowdInputs : 'crowd-inputs'
+      crowdInputs : 'crowd-inputs',
+      presence : 'presence'
     }
   }
 }
