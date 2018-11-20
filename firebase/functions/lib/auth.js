@@ -149,7 +149,6 @@ class Auth {
       await firebase.auth().setCustomUserClaims(userId, claim);
     }
 
-    await firebase.auth().setCustomUserClaims(userId, claim);
     return firebase.auth().createCustomToken(userId, claim);
   }
 
