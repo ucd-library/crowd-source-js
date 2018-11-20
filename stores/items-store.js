@@ -111,6 +111,28 @@ class ItemsStore extends BaseStore {
     });
   }
 
+  setCrowdInfoSaving(id, payload, request) {
+    let currentState = this.getCrowdInfo(id) || {};
+
+    this._setCrowdInfoState({
+      id, request,
+      payload : currentState.payload,
+      savePayload : payload,
+      state: this.STATE.SAVING
+    });
+  }
+
+  setCrowdInfoSaveError(id, payload, error) {
+    let currentState = this.getCrowdInfo(id) || {};
+
+    this._setCrowdInfoState({
+      id, error,
+      payload : currentState.payload,
+      savePayload : payload,
+      state: this.STATE.SAVE_ERROR
+    });
+  }
+
   setCrowdInfoError(id, error) {
     this._setCrowdInfoState({
       id, error,

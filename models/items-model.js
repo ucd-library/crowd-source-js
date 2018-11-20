@@ -1,5 +1,6 @@
 const {BaseModel} = require('@ucd-lib/cork-app-utils');
 const ItemsService = require('../services/items-service');
+const AuthStore = require('../stores/auth-store');
 
 class ItemsModel extends BaseModel {
 
@@ -73,6 +74,40 @@ class ItemsModel extends BaseModel {
     } else {
       await this.service.getCrowdInfo(id);
     }
+
+    return this.store.getCrowdInfo(id);
+  }
+
+  /**
+   * @method updateCrowdInfo
+   * @description update crowd source metadata for item
+   * 
+   * @param {String} id item id
+   * @param {Object} flags update flags
+   * @param {Boolean} flags.editable should the crowd make edits to item
+   * @param {Boolean} flags.completed is the item complete, no more crowd inputs should be made
+   * @param {Boolean} jwt Optional.  Defaults to PGR jwt token stored in AuthStore
+   * 
+   * @returns {Promise}
+   */
+  async updateCrowdInfo(id, flags, jwt) {
+    let payload = {};
+    if( flags.completed !== undefined ) {
+      payload.completed = flags.completed;
+    }
+    if( flags.editable !== undefined ) {
+      payload.editable = flags.editable;
+    }
+    if( Object.keys(payload).length === 0 ) {
+      return; // noop
+    }
+    
+    try {
+      if( !jwt ) {
+        jwt = AuthStore.getTokens().pgr;
+      }
+      await this.service.updateCrowdInfo(id, payload, tokens.pgr);
+    } catch(e) {}
 
     return this.store.getCrowdInfo(id);
   }

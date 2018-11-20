@@ -1,4 +1,6 @@
 const {BaseModel} = require('@ucd-lib/cork-app-utils');
+const Auth0 = require('auth0-js');
+const Auth0Lock = require('auth0-lock').default;
 const AuthModel = require('./auth-model');
 const AuthStore = require('../stores/auth-store');
 const Auth0Service = require('../services/auth0-service');
@@ -10,8 +12,22 @@ class Auth0Model extends BaseModel {
   constructor() {
     this.service = Auth0Service;
     this.store = Auth0Store;
+    this.config = config.auth0;
+
+    if( typeof window !== 'undefined' ) {
+      // login UI
+      this.lock = new Auth0Lock(this.config.clientID, this.config.domain, this.config.lockOptions);
+      // used for silent login
+      this.auth0WebAuth = new Auth0.WebAuth({clientID: this.config.clientID, domain: this.config.domain});
+    }
+
+    // auth0 library used for things like delegation 
+    this.auth0 = new Auth0.Authentication({clientID: this.config.clientID, domain: this.config.domain});
+    
 
     this.EventBus.on(AuthStore.events.AUTH_USER_UPDATE, e => this._handleAppAuthEvents(e));
+  
+    this.register('Auth0Model');
   }
 
   /**

@@ -18,7 +18,11 @@ class ItemsService extends BaseService {
    * 
    * @returns {Promise}
    */
-  get(id, noCache=false) {
+  get(id, noCache=false, transform) {
+    if( !transform ) {
+      transform = (item) => item;
+    }
+
     return this.request({
       url : `${config.fin.host}/api/records${id}`,
       fetchOptions : {
@@ -27,7 +31,7 @@ class ItemsService extends BaseService {
       checkCached : () => (!noCache && this.store.get(id)),
       onLoading : request => this.store.setItemLoading(id, request),
       onError : e => this.store.setItemError(id, e),
-      onLoad : response => this.store.setItemLoaded(id, response.body)
+      onLoad : response => this.store.setItemLoaded(id, transform(response.body))
     });
   }
 
@@ -90,6 +94,25 @@ class ItemsService extends BaseService {
       onLoading : request => this.store.setCrowdInfoLoading(id, request),
       onError : e => this.store.setCrowdInfoError(id, e),
       onLoad : response => this.store.setCrowdInfoLoaded(id, response.body)
+    });
+  }
+
+  updateCrowdInfo(id, payload, jwt) {
+    return this.request({
+      url : `${API_HOST}/items`,
+      qs : {item_id : `eq.${id}`},
+      json : true,
+      fetchOptions : {
+        method : 'PATCH',
+        body : payload,
+        headers : {
+          Prefer : 'return=representation',
+          Authorization : `Bearer ${jwt}`
+        }
+      },
+      onLoading : request => this.store.setCrowdInfoSaving(id, payload, request),
+      onError : async e => this.store.setCrowdInfoSaveError(id, payload, e),
+      onLoad : result => this.store.setCrowdInfoLoaded(id, result.body[0])
     });
   }
 
