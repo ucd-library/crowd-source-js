@@ -94,3 +94,9 @@ const serviceAccount = require('./service-account.json');
 ## FIN / DAMS
 
 The DAMS Elastic Search API is public and does not require authentication.
+
+# Auth0
+
+Here is the standard authentication flow with Auth0
+
+![crowd-source-js auth flow](./docs/crowd-source-js-auth-flow.png)
