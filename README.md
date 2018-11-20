@@ -39,8 +39,45 @@ JS library for interacting with UCD library crowd source databases.  Including c
   - supports text, filters, limit, offsets, etc
 - get crowd info (PGR)
   - get crowd information for item, ex: editable, completed
+- update crowd info (PGR)
+  - update the crowd information for item (admin only)
 - get crowd child stats (PGR)
   - given a item id, get summary of crowd info for all child items
+
+## Presence
+
+- set user id
+  - set the user id to be automatically associated with all presence objects
+- update presence
+  - add or update a new presence object.  Will automatically add userId, uid
+    and appId to object.  Used to listen for realtime updates while they are 
+    happening.
+- remove presence
+  - remove a presence object
+
+*Note: the PresenceService will list to firebase authentication events and remove presence on logout.  The service will also set handlers so on disconnect, presence objects are removed.
+
+## Auth
+
+- userLogin
+  - Given a user firebase jwt  token and PGR jwt token, store tokens and run firebase login function.
+- anonymousLogin
+  - Use the Google Cloud Function service to generate anonymous user firebase and pgr tokens.  Then login user to firebase with token and finally store tokens
+
+## Auth0
+
+Auth0 is an optional extension for including Auth0 as a authentication and authorization source.  Note the Auth model just requires JWTs signed with applications Firebase and PGR accounts.  This model provides support for; logging in via Auth0 Lock UI, running Auth0 Lock authentication flow, generating Firebase and PGR JWTs from Auth0 JWT.  The generated JWTs are then passed to the AuthModel userLogin() function.
+
+Note.  Perhaps this should be broken out to it's own JS library?
+
+- login
+  - Show the Auth0 Lock widget starting the login flow
+- isRedirect
+  - is the current hash in the windows url a redirect from Auth0?  If so, continue the login flow
+- loginJwt
+  - Continue Auth0 login flow after new JWT is issued.  Given a Auth0 JWT, use the Google Cloud Function service to generate Firebase and PGR JWTs from Auth0 JWT.  Roles provided in Auth0 JWT will be automatically associated to Firebase/PGR JWTs.
+- initAuthRenewAuth0/autoRenew
+  - both of these functions should be called by isRedirect(true).  The true flag will initiate a silent login flow for user if the url hash is not in the middle of a Auth0 login.  Silent logins will take a access token that is about to expire and generate a new one.
 
 # Authentication
 

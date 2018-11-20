@@ -31,6 +31,10 @@ class PresenceService extends BaseService {
       this.store.setConnectedState(snapshot.val());
       this._setPresenceRef();
     });
+
+    // TODO:
+    // we also need to listen to auth events and remove presence objects
+    // automatically on logout
   }
 
   /**
