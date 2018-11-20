@@ -4,5 +4,6 @@ module.exports = {
   AuthMode : require('./models/auth-model'),
   Auth0Mode : require('./models/auth0-model'),
   PresenceModel : require('./models/presence-model'),
-  Firestore : require('./lib/firestore')
+  Firestore : require('./lib/firestore'),
+  config : require('./config')
 }

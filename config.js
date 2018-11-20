@@ -31,6 +31,30 @@ module.exports = {
     autoRenew : {
       enabled : true,
       path : '/silent-login.html'
-    }
+    },
+    domain : 'ucdlibrary.auth0.com', 
+    clientID: '',
+    scope : 'openid email profile',
+    localStorageKeys : {
+      profile : 'auth0-profile',
+      redirectHash : 'auth-redirect-hash'
+    },
+    lockOptions : {
+      auth : {
+        autoParseHash: false,
+        params: {
+            responseType: 'token id_token',
+            scope: 'openid mail profile'
+        }
+      },
+      languageDictionary: {
+        title: "Price the Vintage"
+      },
+      theme: {
+        logo: '/images/library.png',
+        primaryColor: '#912046'
+      }
+    },
+    jwksUrl : 'https://ucdlibrary.auth0.com/.well-known/jwks.json'
   }
 }
