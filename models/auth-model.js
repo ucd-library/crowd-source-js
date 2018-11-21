@@ -16,6 +16,16 @@ class AuthModel extends BaseModel {
   }
 
   /**
+   * @method logout
+   * @description log user out of firebase, discard firebase and pgr JWTs
+   * 
+   * @returns {Promise}
+   */
+  logout() {
+    return this.service.logout();
+  }
+
+  /**
    * @method userLogin
    * @description given a firebase and pgr jwt, sign a user into firebase
    * and store both tokens

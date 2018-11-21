@@ -10,14 +10,6 @@ class AuthService extends BaseService {
     this.firebase = firestore.firebase;
     this.cloudFnConfig = config.firestore.cloudFunctions;
 
-    this._initAuthHandler();
-  }
-
-  /**
-   * @method _initAuthHandler
-   * @description
-   */
-  _initAuthHandler() {
     this.firebase.auth().onAuthStateChanged((user) => {
       if( user ) this.store.setUserLoggedIn(user);
       else this.store.setUserLoggedOut();
@@ -34,8 +26,13 @@ class AuthService extends BaseService {
   }
 
   userLogin(firebaseJwt, pgrJwt) {
-    this.store.setTokens(firebaseJwt, pgrJwt);
+    this.store.setTokensLoaded(firebaseJwt, pgrJwt);
     return this.firebase.auth().signIn(firebaseJwt);
+  }
+
+  logout() {
+    this.store.clearTokens();
+    return this.firebase.auth().signOut();
   }
 
 }

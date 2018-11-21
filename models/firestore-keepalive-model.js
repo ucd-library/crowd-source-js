@@ -109,8 +109,12 @@ class FirestoreKeepaliveModel extends BaseModel {
           console.warn('keepalive model got request for unknown model: '+key);
           continue;
         }
+        if( !this.models[key].cleanupRtc ) {
+          console.warn(`keepalive model ${key} has no cleanup realtime connections method (cleanupRtc)`);
+          continue;
+        }
 
-        this.models[key].cleanup(this.responses[key]);
+        this.models[key].cleanupRtc(this.responses[key]);
       }
     }, 100);
   }

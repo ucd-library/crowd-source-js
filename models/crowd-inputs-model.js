@@ -243,14 +243,14 @@ class CrowdInputsModel extends BaseModel {
   }
 
   /**
-   * @method cleanup
+   * @method cleanupRtc
    * @description After firestore keepalive request, this will be called.  It will let you know
    * all the ItemId crowd input that elements are still interested in.  You are free to 
    * remove any Firebase Reference that is NOT in this list.
    * 
    * @param {Object} interested - hash of keepalive item ids
    */
-  cleanup(interested) {
+  cleanupRtc(interested) {
     this.store
       .getAllListeningIds()
       .forEach(itemId => {

@@ -4,14 +4,12 @@ const Auth0Lock = require('auth0-lock').default;
 const AuthModel = require('./auth-model');
 const AuthStore = require('../stores/auth-store');
 const Auth0Service = require('../services/auth0-service');
-const Auth0Store = require('../stores/auth0-store');
 const config = require('../config');
 
 class Auth0Model extends BaseModel {
 
   constructor() {
     this.service = Auth0Service;
-    this.store = Auth0Store;
     this.config = config.auth0;
 
     if( typeof window !== 'undefined' ) {
@@ -38,6 +36,16 @@ class Auth0Model extends BaseModel {
   login() {
     localStorage.setItem(config.auth0.localStorageKeys.redirectHash, window.location.hash);
     this.lock.show();
+  }
+
+  /**
+   * @method logout
+   * @description log user out of auth0, firebase and discard all tokens
+   * 
+   * @returns {Promise}
+   */
+  logout() {
+    return AuthModel.logout();
   }
 
   /**
@@ -189,7 +197,9 @@ class Auth0Model extends BaseModel {
       this.lock.getUserInfo(authResult.accessToken, async (error, profile) => {
         if( error ) throw error;
 
-        this.store.setUserLoggedIn({authResult, profile});
+        AuthStore.setUserAdditionalProfile({
+          auth0 : {authResult, profile}
+        });
 
         try {
           await this.loginJwt(authResult.idToken);

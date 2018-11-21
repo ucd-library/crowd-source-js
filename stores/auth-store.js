@@ -22,16 +22,30 @@ class AuthStore extends BaseStore {
 
   setUserLoggedOut() {
     this._setUserState({
-      payload : null,
+      user : null,
       state : 'loggedOut'
     });
   }
 
-  setUserLoggedIn(user) {
+  /**
+   * User will always be the firebase user account
+   */
+  setUserLoggedIn(firebaseUser, additionalProfile) {
+    if( !additionalProfile && this.getUser().additionalProfile ) {
+      additionalProfile = this.getUser().additionalProfile;
+    }
+
     this._setUserState({
-      payload : user,
+      firebaseUser,
+      additionalProfile,
       state : 'loggedIn'
     });
+  }
+
+  setUserAdditionalProfile(additionalProfile) {
+    let state = this.getUser() || {};
+    state.additionalProfile = additionalProfile;
+    this._setTokenState(state);
   }
 
   _setUserState(newState) {
@@ -69,6 +83,13 @@ class AuthStore extends BaseStore {
       payload: {firebase, pgr},
       anonymous,
       state: this.STATE.LOADED
+    });
+  }
+
+  clearTokens() {
+    this._setTokenState({
+      payload: null,
+      state: 'loggedOut'
     });
   }
 

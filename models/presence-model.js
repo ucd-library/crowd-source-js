@@ -15,13 +15,8 @@ class PresenceModel extends BaseModel {
     this.register('PresenceModel');
   }
 
-  setAuthUserId(userId) {
-    this.store.setUserId(userId);
-    this.service.setPresenceRef();
-  }
-
   /**
-   * @method updatePresence
+   * @method updateUserPresence
    * @description add or update presence data.  If a id is provided, an update will 
    * be performed, otherwise the id will be auto generated and a insert will be made.
    * The userId and sessionId properties will be automatically added to the object.
@@ -30,7 +25,7 @@ class PresenceModel extends BaseModel {
    * 
    * @returns {Promise} 
    */
-  updatePresence(presence) {
+  updateUserPresence(presence) {
     let uid = this.store.getUserId();
     if( !uid ) throw new Error('User id not set');
 
@@ -41,20 +36,59 @@ class PresenceModel extends BaseModel {
     presence.appId = config.appId;
 
     try {
-      await this.service.updatePresence(presence);
+      await this.service.updateUserPresence(presence);
     } catch(e) {}
 
-    return this.store.getPresence(presence.id);
+    return this.store.getUserPresence(presence.id);
   }
 
-  removePresence(id) {
+  removeUserPresence(id) {
     try {
-      this.service.removePresence(id);
+      this.service.removeUserPresence(id);
     } catch(e) {}
 
-    return this.store.getPresence(id);
+    return this.store.getUserPresence(id);
   }
 
+  /**
+   * @method listenPending
+   * @description get realtime updates for user presence by item
+   * 
+   * @param {String} id item id
+   */
+  listenPresenceByItem(id) {
+    this.service.listenPresenceByItem(id);
+  }
+
+  /**
+   * @method unlistenPending
+   * @description stop listening for realtime updates for presence
+   * 
+   * @param {String} id item id
+   */
+  unlistenPresenceByItem(id) {
+    let unsubscribe = this.store.getUnsubscribeByItemId(id);
+    if( !unsubscribe ) return;
+    unsubscribe();
+    this.store.deletePresenceByItem(id);
+  }
+
+  /**
+   * @method cleanupRtc
+   * @description After firestore keepalive request, this will be called.  It will let you know
+   * all the ItemId crowd input that elements are still interested in.  You are free to 
+   * remove any Firebase Reference that is NOT in this list.
+   * 
+   * @param {Object} interested - hash of keepalive item ids
+   */
+  cleanupRtc(interested) {
+    this.store
+      .getAllListeningIds()
+      .forEach(itemId => {
+        if( interested[itemId] ) return;
+        this.unlistenPresenceByItem(itemId);
+      });
+  }
 
 
 }
