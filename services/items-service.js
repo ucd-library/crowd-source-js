@@ -99,7 +99,7 @@ class ItemsService extends BaseService {
 
   updateCrowdInfo(id, payload, jwt) {
     return this.request({
-      url : `${API_HOST}/items`,
+      url : `${config.pgr.host}/items`,
       qs : {item_id : `eq.${id}`},
       json : true,
       fetchOptions : {

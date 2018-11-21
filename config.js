@@ -2,7 +2,8 @@ const GOOGLE_PROJECT_ID = 'price-the-vintage-dams';
 
 module.exports = {
   appId : '',
-  
+  collectionId : '',
+
   fin : {
     host : 'https://digital.ucdavis.edu'
   },

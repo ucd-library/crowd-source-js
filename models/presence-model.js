@@ -26,10 +26,12 @@ class PresenceModel extends BaseModel {
    * @returns {Promise} 
    */
   updateUserPresence(presence) {
-    let uid = this.store.getUserId();
-    if( !uid ) throw new Error('User id not set');
+    if( !presence.userId ) {
+      let uid = this.store.getUserId();
+      if( !uid ) throw new Error('User id not set');  
+      presence.userId = uid;
+    }
 
-    presence.userId = uid;
     if( !presence.id ) {
       presence.id = uuid.v4();
     }

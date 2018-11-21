@@ -15,18 +15,19 @@ class PresenceService extends BaseService {
     this.sessionClientId = uuid.v4();
 
     this.firebase = this.firestore.firebase;
-    this._initDisconnectHandler();
+    this._initConnectionHandler();
+    this._initAuthHandler();
   }
 
   /**
-   * @method _initConnectedHandler
+   * @method _initConnectionHandler
    * @description handle user losing/gaining connection to firebase
    * 
    * Note.  Firestore doesn't handle this, so we have to use the firebase
    * database hack/workaround :(
    * https://firebase.google.com/docs/firestore/solutions/presence
    */
-  _initConnectedHandler() {
+  _initConnectionHandler() {
     // listen to updates about state of app
     this.firebase.database().ref('.info/connected').on('value', (snapshot) => {
       this.store.setConnectedState(snapshot.val());
