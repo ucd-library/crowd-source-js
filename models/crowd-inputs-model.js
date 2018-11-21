@@ -1,6 +1,7 @@
 const {BaseModel} = require('@ucd-lib/cork-app-utils');
 const CrowdInputsService = require('../services/crowd-inputs-service');
 const CrowdInputsStore = require('../stores/crowd-inputs-store');
+const AuthStore = require('../stores/auth-store');
 const uuid = require('uuid');
 const config = require('../config');
 const clone = require('clone');
@@ -63,7 +64,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @param {String} id 
    * @param {String} schema schema type.  Required for PGR which will validate the crowdInput.data object
-   * @param {String} jwt pgr admin jwt
+   * @param {String} jwt Optional. pgr admin jwt. Defaults to AuthModel pgr token
    */
   async setApproved(id, schema, jwt) {
     let crowdInput = await this.getPending(id);
@@ -77,6 +78,10 @@ class CrowdInputsModel extends BaseModel {
     crowdInput.data['@schema'] = schema;
     delete crowdInput.id;
 
+    if( !jwt ) {
+      jwt = AuthStore.getTokens().pgr;
+    }
+    
     try {
       await this.service.setApproved(crowdInput, jwt);
     } catch(e) {}
@@ -237,7 +242,22 @@ class CrowdInputsModel extends BaseModel {
     this.store.deleteUnsubscribeByItem(id);
   }
 
-  // TODO persistence
+  /**
+   * @method cleanup
+   * @description After firestore keepalive request, this will be called.  It will let you know
+   * all the ItemId crowd input that elements are still interested in.  You are free to 
+   * remove any Firebase Reference that is NOT in this list.
+   * 
+   * @param {Object} interested - hash of keepalive item ids
+   */
+  cleanup(interested) {
+    this.store
+      .getAllListeningIds()
+      .forEach(itemId => {
+        if( interested[itemId] ) return;
+        this.unlistenPendingByItem(itemId);
+      });
+  }
 }
 
 module.exports = new CrowdInputsModel();

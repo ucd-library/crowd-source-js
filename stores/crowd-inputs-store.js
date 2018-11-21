@@ -305,6 +305,10 @@ class CrowdInputsStore extends BaseStore {
     return this.data.pending.unsubscribeByItem[id];
   }
 
+  getAllListeningIds() {
+    return Object.keys(this.data.pending.unsubscribeByItem);
+  }
+
   setUnsubscribeByItem(id, unsubscribe) {
     this.data.pending.unsubscribeByItem[id] = unsubscribe;
   }
