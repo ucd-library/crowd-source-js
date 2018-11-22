@@ -166,6 +166,29 @@ class CrowdInputsService extends BaseService {
     }
   }
 
+  votePending(id, vote, jwt) {
+    return this.request({
+      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/vote/${id}`,
+      json : true,
+      fetchOptions : {
+        method : 'POST',
+        headers : {Authorization: `Bearer ${jwt}`},
+        body : vote
+      }
+    });
+  }
+
+  removeVotePending(id, jwt) {
+    return this.request({
+      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/vote/${id}`,
+      json : true,
+      fetchOptions : {
+        method : 'DELETE',
+        headers : {Authorization: `Bearer ${jwt}`}
+      }
+    });
+  }
+
   async getPendingByItem(id) {
     try {
       // setup firebase query and stash promise

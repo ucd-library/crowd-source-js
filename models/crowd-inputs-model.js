@@ -125,6 +125,13 @@ class CrowdInputsModel extends BaseModel {
       throw new Error('Crowd input id required');
     }
 
+    // sending votes on update will fail here.  make sure they are stripped.
+    // Use votes API to edit votes
+    if( crowdInput.votes ) {
+      crowdInput = clone(crowdInput);
+      delete crowdInput.votes;
+    }
+
     try {
       await this.service.updatePending(crowdInput);
     } catch(e) {}
@@ -199,6 +206,22 @@ class CrowdInputsModel extends BaseModel {
     }
 
     this.store.getPending(id);
+  }
+
+  async votePending(id, vote, jwt) {
+    if( !jwt ) jwt = AuthStore.getTokens().firebase;
+    if( typeof vote !== 'object' ) {
+      vote = {vote};
+    }
+
+    await this.service.votePending(id, vote, jwt);
+    return this.getPending(id, true);
+  }
+
+  async removeVotePending(id, jwt) {
+    if( !jwt ) jwt = AuthStore.getTokens().firebase;
+    await this.service.removeVotePending(id, jwt);
+    return this.getPending(id, true);
   }
 
   /**
