@@ -10,10 +10,10 @@ class SuggestService extends BaseService {
     this.store = SuggestStore;
   }
 
-  addSuggestion(payload, jwt) {
+  add(payload, jwt) {
     // check this
     let response = await this.request({
-      url : `${config.pgr.host}/suggest?text=eq.${encodeURIComponent(payload.text)}&type=${payload.type}`
+      url : `${config.pgr.host}/suggest?text=eq.${encodeURIComponent(payload.text)}&domain=eq.${payload.domain}`
     });
     if( response.body.length > 0 ) return; // already exists;
 
@@ -31,10 +31,17 @@ class SuggestService extends BaseService {
     });
   }
 
-  async findSuggestions(collectionId, type, text) {
+  async find(appId, collectionId, domain, text) {
     text = await pgrUtils.escapeTSVector(text);
     let response = await this.request({
-      url : `${config.pgr.host}/suggest?tsv=eq.${encodeURIComponent(text)}&type=${type}&collectionId=${collectionId}`
+      url : `${config.pgr.host}/suggest?tsv=@@.${encodeURIComponent(text)}&domain=eq.${domain}&collection_id=eq.${collectionId}&app_id=eq.${appId}`
+    });
+    return response.body;
+  }
+
+  async all(appId, collectionId, domain) {
+    let response = await this.request({
+      url : `${config.pgr.host}/suggest?select=text&domain=eq.${domain}&collection_id=eq.${collectionId}&app_id=eq.${appId}`
     });
     return response.body;
   }
