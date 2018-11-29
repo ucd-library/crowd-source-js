@@ -1,4 +1,4 @@
-const firestore = require('../lib/firestore');
+const firestore = require('../../lib/firestore');
 const data = require('./data');
 
 describe('Tear down and cleanup', function() {

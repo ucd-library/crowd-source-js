@@ -1,7 +1,7 @@
 // Generate items for test
 const _request = require('request');
-const firestore = require('../lib/firestore');
-const config = require('../config');
+const admin = require('../../admin/lib/firebase');
+const config = require('../../client/config');
 
 const FIRESTORE_COLLECTIONS = config.firestore.collections
 const COLLECTION_ID = 'test-collection';
@@ -9,6 +9,14 @@ const APP_ID = 'testing';
 const ITEM_ID = '/collection/testing-collection/testing-test-test';
 
 class GenerateData {
+
+  creatApp() {
+    return {
+      app_id : APP_ID,
+      name : 'Testing app',
+      description : 'This is for integration testing'
+    }
+  }
 
   createCollection() {
     return {
@@ -66,8 +74,8 @@ class GenerateData {
   }
 
   async cleanupFirestore() {
-    await firestore.signIn(Users.admin.firestoreJwt);
-
+    let firestore = admin.firestore;
+    
     let query = await firestore.db
       .collection(FIRESTORE_COLLECTIONS.crowdInputs)
       .where('appId', '==', APP_ID)

@@ -1,15 +1,8 @@
 const assert = require('assert');
 const model = require('../../models/crowd-inputs-model');
 const firestore = require('../../lib/firestore');
-const data = require('../data');
+const data = require('../utils/data');
 
-const COLLECTION_ID = 'test-collection';
-const APP_ID = 'testing';
-const ITEM_ID = '/collection/testing-collection/testing-test-test';
-const TEST_DATA = {
-  foo : 'bar',
-  baz : [1,2,3]
-};
 
 let crowdInput;
 

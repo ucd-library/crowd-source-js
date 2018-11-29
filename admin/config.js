@@ -2,11 +2,15 @@
 let config = {
   pgr : {
     jwt : '',
-    host : ''
+    host : '',
+    secret : ''
   },
   firebase : {
     host : '',
-    serviceAccountPath : ''
+    serviceAccountPath : '',
+    collections : {
+      appConfig : 'app-config'
+    }
   },
   dams : {
     host : ''

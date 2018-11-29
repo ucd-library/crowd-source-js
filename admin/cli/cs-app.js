@@ -33,7 +33,7 @@ program
   
 program
   .command('update-webhooks <app-id>')
-  .option("-u, --url [url]", 'Url to notify when pending crowd-input updates', multiple, [])
+  .option('-u, --url [url]', 'Url to notify when pending crowd-input updates', multiple, [])
   .description('Set application webhook urls')
   .action(async (id, options) => {
     await firebase.setWebhooks(id, options.url);
