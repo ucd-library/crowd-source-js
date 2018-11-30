@@ -5,6 +5,7 @@ const pgr = require('../../admin/lib/pgr');
 const firestore = require('../../client/lib/firestore');
 const assert = require('assert');
 const jwt = require('jsonwebtoken');
+const data = require('./data');
 
 const pubKey = fs.readFileSync(path.resolve(__dirname, '..', 'service-account.pub'), 'utf-8');
 
@@ -57,6 +58,8 @@ class AuthUtils {
         pgrJwt : pgr.createJwt('anonymous@test.org', 'anon', false)
       },
     }
+
+    await data.cleanupPgr();
   }
 
 }

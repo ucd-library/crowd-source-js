@@ -75,7 +75,7 @@ class AdminPgr {
    */
   createCollection(payload, jwt) {
     if( !jwt ) jwt = config.pgr.jwt;
-    return request(`${config.pgr.host}/applications`, {
+    return request(`${config.pgr.host}/collections`, {
       method : 'POST',
       body : JSON.stringify(payload),
       headers : {
@@ -85,7 +85,62 @@ class AdminPgr {
     });
   }
 
+  /**
+   * @method listApps
+   * @description list all applications in PGR
+   * 
+   * @returns {Promise}
+   */
+  listCollections() {
+    return request(`${config.pgr.host}/collections`);
+  }
 
+  /**
+   * @method removeCollection
+   * @description remove collection
+   * 
+   * @param {String} collectionId 
+   * @param {String} jwt
+   * 
+   * @returns {Promise} 
+   */
+  removeCollection(collectionId, jwt) {
+    if( !jwt ) jwt = config.pgr.jwt;
+    return request(`${config.pgr.host}/collections?collection_id=eq.${collectionId}`, {
+      method : 'DELETE',
+      headers : {
+        Authorization : `Bearer ${jwt}`
+      }
+    });
+  }
+  
+  /**
+   * @method addAppSchema
+   * @description register a JSON schema for application
+   * 
+   * @param {Object} payload
+   * @param {String} payload.app_id 
+   * @param {String} payload.schema_id ex: wine-mark
+   * @param {String} payload.schema JSON Schema string 
+   * @param {String} jwt Optional 
+   * 
+   * @returns {Promise}
+   */
+  addAppSchema(payload, jwt) {
+    if( typeof payload.schema !== 'string' ) {
+      payload.schema = JSON.stringify(payload.schema);
+    }
+
+    if( !jwt ) jwt = config.pgr.jwt;
+    return request(`${config.pgr.host}/schemas`, {
+      method : 'POST',
+      body : JSON.stringify(payload),
+      headers : {
+        Prefer : 'return=representation',
+        Authorization : `Bearer ${jwt}`
+      }
+    });
+  }
 
   /**
    * @method listAppSchemas
@@ -99,32 +154,7 @@ class AdminPgr {
     return request(`${config.pgr.host}/schemas?app_id=eq.${appId}`);
   }
 
-  /**
-   * @method addAppSchema
-   * @description register a JSON schema for application
-   * 
-   * @param {String} appId 
-   * @param {String} schemaId ex: wine-mark
-   * @param {String} schema JSON Schema string 
-   * @param {String} jwt Optional 
-   * 
-   * @returns {Promise}
-   */
-  addAppSchema(appId, schemaId, schema, jwt) {
-    if( !jwt ) jwt = config.pgr.jwt;
-    return request(`${config.pgr.host}/schemas`, {
-      method : 'POST',
-      body : JSON.stringify({
-        app_id : appId,
-        schema_id : schemaId,
-        schema
-      }),
-      headers : {
-        Prefer : 'return=representation',
-        Authorization : `Bearer ${jwt}`
-      }
-    });
-  }
+
 
   /**
    * @method removeAppSchema
@@ -164,30 +194,34 @@ class AdminPgr {
    * @method addItem
    * @description add item
    * 
-   * @param {String} appId 
-   * @param {String} collectionId 
-   * @param {String} itemId 
-   * @param {String} parentItemId item_id of parent item.  will append app_id for you and set as parent_id.
-   * @param {Object} options 
-   * @param {Boolean} options.completed 
-   * @param {Boolean} options.editable
-   * @param {Boolean} options.index
+   * @param {Object} item
+   * @param {String} item.app_id 
+   * @param {String} item.collection_id 
+   * @param {String} item.item_id 
+   * @param {String} item.parent_item_id 
+   * @param {Boolean} item.completed 
+   * @param {Boolean} item.editable
+   * @param {Boolean} item.index
    * @param {String} jwt Optional.
    * 
    * @returns {Promise}
    */
-  addItem(appId, collectionId, itemId, parentItemId, options={}, jwt) {
+  addItem(item, options={}, jwt) {
+    if( !item.app_id || !item.item_id ) {
+      throw new Error('app_id and item_id required');
+    }
+
     let payload = {
-      app_item_id : this.createAppItemId(appId, itemId),
-      app_id : appId,
-      collection_id : collectionId,
-      item_id : itemId,
+      app_item_id : this.createAppItemId(item.app_id, item.item_id),
+      app_id : item.app_id,
+      collection_id : item.collection_id,
+      item_id : item.item_id,
       editable : options.editable !== undefined ? options.editable : true,
       completed : options.completed !== undefined ? options.completed : true,
       index : options.index !== undefined ? options.index : -1
     }
-    if( parentItemId ) {
-      payload.parent_id = this.createAppItemId(appId, parentItemId);
+    if( item.parent_item_id ) {
+      payload.parent_id = this.createAppItemId(item.app_id, item.parent_item_id);
     }
     if( !jwt ) jwt = config.pgr.jwt;
 
@@ -201,6 +235,15 @@ class AdminPgr {
     });
   }
 
+  listRootItems(appId) {
+    return request(`${config.pgr.host}/items?app_id=eq.${appId}&parent_id=is.null`);
+  }
+
+  async listChildItems(appId, parentItemId) {
+    let parentId = this.createAppItemId(appId, parentItemId);
+    return request(`${config.pgr.host}/items?app_id=eq.${appId}&parent_id=eq.${encodeURIComponent(parentId)}`);
+  }
+
   /**
    * @method updateItem
    * 
@@ -208,7 +251,7 @@ class AdminPgr {
    * @param {String} jwt Optional.
    */
   updateItem(payload, jwt) {
-    return request(`${config.pgr.host}/items`, {
+    return request(`${config.pgr.host}/items/${item_id}`, {
       method : 'PATCH',
       body : JSON.stringify(payload),
       headers : {
@@ -218,6 +261,16 @@ class AdminPgr {
     });
   }
 
+  removeItem(appId, itemId, jwt) {
+    if( !jwt ) jwt = config.pgr.jwt;
+
+    return request(`${config.pgr.host}/items?app_id=eq.${appId}&item_id=eq.${itemId}`, {
+      method : 'DELETE',
+      headers : {
+        Authorization : `Bearer ${jwt}`
+      }
+    });
+  }
 
 }
 

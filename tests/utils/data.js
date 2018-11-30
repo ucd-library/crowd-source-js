@@ -1,16 +1,19 @@
 // Generate items for test
 const _request = require('request');
 const admin = require('../../admin/lib/firebase');
-const config = require('../../client/config');
+const clientConfig = require('../../client/config');
+const config = require('../../admin/config');
 
-const FIRESTORE_COLLECTIONS = config.firestore.collections
+const FIRESTORE_COLLECTIONS = clientConfig.firestore.collections
 const COLLECTION_ID = 'test-collection';
 const APP_ID = 'testing';
 const ITEM_ID = '/collection/testing-collection/testing-test-test';
+const CHILD_ITEM_ID = '/collection/testing-collection/testing-test-test/child';
+const SCHEMA_ID = 'wine-mark';
 
 class GenerateData {
 
-  creatApp() {
+  createApp() {
     return {
       app_id : APP_ID,
       name : 'Testing app',
@@ -26,14 +29,51 @@ class GenerateData {
     }
   }
 
-  createItem() {
+  createItemParent() {
     return {
+      app_id : APP_ID,
       item_id : ITEM_ID,
       collection_id : COLLECTION_ID,
-      parent_id : null,
+      editable : true,
+      completed : false
+    }
+  }
+
+  createItemChild() {
+    return {
+      app_id : APP_ID,
+      item_id : CHILD_ITEM_ID,
+      collection_id : COLLECTION_ID,
+      parent_item_id : ITEM_ID,
       editable : true,
       completed : false,
-      index : null
+      index : 0
+    }
+  }
+
+  createSchema() {
+    return {
+      schema_id : SCHEMA_ID,
+      app_id : APP_ID,
+      schema : {
+        "id": "/WineMark",
+        "type": "object",
+        "properties": {
+          "type" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "perprice" : {
+            "type" : "number"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "name", "type", "perprice"
+        ]
+      }
     }
   }
 
@@ -52,8 +92,28 @@ class GenerateData {
   }
 
   async cleanupPgr() {
-    let response = await request(
-      `${config.pgr.host}/items?collection_id=eq.${COLLECTION_ID}`,
+    await request(
+      `${config.pgr.host}/items?app_id=eq.${APP_ID}&parent_id=not.is.null`,
+      {
+        method : 'DELETE',
+        headers : {
+          Authorization : `Bearer ${Users.admin.pgrJwt}`
+        }
+      }
+    );
+
+    await request(
+      `${config.pgr.host}/items?app_id=eq.${APP_ID}`,
+      {
+        method : 'DELETE',
+        headers : {
+          Authorization : `Bearer ${Users.admin.pgrJwt}`
+        }
+      }
+    );
+
+    await request(
+      `${config.pgr.host}/schemas?app_id=eq.${APP_ID}`,
       {
         method : 'DELETE',
         headers : {
@@ -64,6 +124,16 @@ class GenerateData {
 
     await request(
       `${config.pgr.host}/collections?collection_id=eq.${COLLECTION_ID}`,
+      {
+        method : 'DELETE',
+        headers : {
+          Authorization : `Bearer ${Users.admin.pgrJwt}`
+        }
+      }
+    );
+
+    await request(
+      `${config.pgr.host}/applications?app_id=eq.${APP_ID}`,
       {
         method : 'DELETE',
         headers : {

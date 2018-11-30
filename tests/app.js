@@ -2,7 +2,7 @@ const assert = require('assert');
 const pgr = require('../admin/lib/pgr');
 const data = require('./utils/data');
 
-describe('App', function() {
+describe('Applications', function() {
 
   before(() => {
     pgr.config.jwt = Users.admin.pgrJwt;
@@ -10,12 +10,13 @@ describe('App', function() {
 
   describe('admin methods', async function() {
     it('should create app', async function(){
-      let response = await pgr.createApp(data.creatApp());
+      this.timeout(10000);
+      let response = await pgr.createApp(data.createApp());
       assert.equal(response.statusCode, 201);
     });
 
     it('should not let your create another app with same id', async function(){
-      let response = await pgr.createApp(data.creatApp());
+      let response = await pgr.createApp(data.createApp());
       assert.equal(response.statusCode, 409);
     });
 
@@ -27,7 +28,7 @@ describe('App', function() {
     });
 
     it('should remove app', async function(){
-      let response = await pgr.removeApp(data.creatApp().app_id);
+      let response = await pgr.removeApp(data.createApp().app_id);
       assert.equal(response.statusCode, 204);
     });
 

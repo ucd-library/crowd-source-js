@@ -8,5 +8,9 @@ config.firebase.serviceAccountPath = path.join(__dirname, 'service-account.json'
 
 require('./utils/auth');
 require('./app');
+require('./collection');
+require('./schema');
+require('./items');
+
 // require('./crowd-inputs');
 // require('./utils/disconnect');
