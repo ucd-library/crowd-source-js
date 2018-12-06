@@ -7,8 +7,6 @@ service cloud.firestore {
 
     match /crowd-inputs/{input} {
       allow read;
-      allow create: if request.auth.uid != null && request.data.votes == undefined;
-      allow update: if isOwnerOrAdmin() && request.data.votes == undefined;
       allow delete: if isOwnerOrAdmin();
     }
 

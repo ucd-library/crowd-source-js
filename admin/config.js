@@ -9,7 +9,8 @@ let config = {
     host : '',
     serviceAccountPath : '',
     collections : {
-      appConfig : 'app-config'
+      appConfig : 'app-config',
+      schemas : 'schemas'
     }
   },
   dams : {

@@ -41,6 +41,23 @@ class Firebase {
       .doc(appId)
       .set({webhooks}, {merge:true})
   }
+
+  setSchema(payload) {
+    return this.firestore.collection(this.config.collections.schemas)
+      .doc(payload.app_id+'-'+payload.schema_id)
+      .set({schema: payload.schema});
+  }
+
+  listSchemas() {
+    return this.firestore.collection(this.config.collections.schemas)
+      .get();
+  }
+
+  removeSchema(appId, schemaId) {
+    return this.firestore.collection(this.config.collections.schemas)
+      .doc(appId+'-'+schemaId)
+      .delete()
+  }
 }
 
 module.exports = new Firebase();

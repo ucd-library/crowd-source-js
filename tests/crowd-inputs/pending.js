@@ -1,6 +1,6 @@
 const assert = require('assert');
-const model = require('../../models/crowd-inputs-model');
-const firestore = require('../../lib/firestore');
+const model = require('../../client/models/crowd-inputs-model');
+const firestore = require('../../client/lib/firestore');
 const data = require('../utils/data');
 
 

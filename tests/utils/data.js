@@ -84,9 +84,9 @@ class GenerateData {
       itemId : ITEM_ID,
       userId,
       data : {
-        foo : 'bar',
-        baz : [Math.random(), Math.random()],
-        date : new Date().toISOString()
+        name : 'foo',
+        type : 'bar',
+        perprice : Math.random() * 2
       }
     }
   }

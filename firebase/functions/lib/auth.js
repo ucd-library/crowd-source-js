@@ -16,54 +16,6 @@ class Auth {
 
     // bind up callback functions
     this._getJwksKey = this._getJwksKey.bind(this);
-    this.userMiddleware = this.userMiddleware.bind(this);
-    this.anonymouseMiddleware = this.anonymousMiddleware.bind(this);
-  }
-
-  /**
-   * @method userMiddleware
-   * @description handle express request for generating
-   * user jwt tokens
-   * 
-   * @param {Object} req express request
-   * @param {Object} res express response
-   */
-  async userMiddleware(req, res) {
-    let auth0Jwt = req.body;
-    if( !auth0Jwt ) {
-      return res.status(400).json({
-        error: true,
-        message : 'jwt token required in body'
-      });
-    }
-
-    try {
-      res.json(await this.generateUserTokens(auth0Jwt));
-    } catch(e) {
-      res.status(400).json({
-        error: true,
-        message : e.message
-      });
-    }
-  }
-
-  /**
-   * @method anonymousMiddleware
-   * @description handle express request for generating anonymous
-   * user jwt tokens
-   * 
-   * @param {Object} req express request
-   * @param {Object} res express response
-   */
-  async anonymousMiddleware(req, res) {
-    try {
-      res.json(await this.generateAnonymousTokens());
-    } catch(e) {
-      res.status(400).json({
-        error: true,
-        message : e.message
-      });
-    }
   }
 
   /**
@@ -118,11 +70,20 @@ class Auth {
     }
   }
 
-  generatePgrToken(userId, role) {
+  /**
+   * @method generatePgrToken
+   * @description given userId and role, mint a new jwt token for pgr.
+   * 
+   * @param {String} userId 
+   * @param {String} role
+   * 
+   * @returns {String} 
+   */
+  generatePgrToken(userId, role, expiresIn='1d') {
     return jwt.sign(
       {userId, role}, 
       secrets.pgr, 
-      {expiresIn: '1d'}
+      {expiresIn}
     );
   }
 

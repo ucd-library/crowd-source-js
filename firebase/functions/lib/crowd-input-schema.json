@@ -1,0 +1,31 @@
+{
+  "id": "/CrowdInput",
+  "type": "object",
+  "properties": {
+    "appId" : {
+      "type" : "string"
+    },
+    "collectionId" : {
+      "type" : "string"
+    },
+    "data" : {
+      "type" : "object"
+    },
+    "itemId" : {
+      "type" : "string"
+    },
+    "userId" : {
+      "type" : "string"
+    },
+    "anonymous" : {
+      "type" : "boolean"
+    },
+    "schemaId" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "appId", "collectionId", "data", "itemId", "schemaId"
+  ]
+}

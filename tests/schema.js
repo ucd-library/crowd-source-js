@@ -1,5 +1,6 @@
 const assert = require('assert');
 const pgr = require('../admin/lib/pgr');
+const firebase = require('../admin/lib/firebase');
 const data = require('./utils/data');
 
 describe('Crowd Input Data Schema', function() {
@@ -25,12 +26,23 @@ describe('Crowd Input Data Schema', function() {
       assert.equal(response.statusCode, 200);
       let body = JSON.parse(response.body);
       assert.equal(body.length > 0, true);
+
+      let querySnaphsot = await firebase.listSchemas();
+      for( let doc of querySnaphsot.docs ){
+        console.log(doc.data);
+      }
+      assert.equal(querySnaphsot.docs.length > 0, true);
     });
 
     it('should remove schema', async function(){
       let schema = data.createSchema();
       let response = await pgr.removeAppSchema(schema.app_id, schema.schema_id);
       assert.equal(response.statusCode, 204);
+
+      let querySnaphsot = await firebase.listSchemas();
+      for( let doc of querySnaphsot.docs ){
+        console.log(doc.data);
+      }
     });
 
   });

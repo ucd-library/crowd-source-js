@@ -1,6 +1,7 @@
 const request = require('./request');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const firebase = require('./firebase');
 
 class AdminPgr {
 
@@ -115,7 +116,7 @@ class AdminPgr {
   }
   
   /**
-   * @method addAppSchema
+   * @method addSchema
    * @description register a JSON schema for application
    * 
    * @param {Object} payload
@@ -126,13 +127,13 @@ class AdminPgr {
    * 
    * @returns {Promise}
    */
-  addAppSchema(payload, jwt) {
+  async addSchema(payload, jwt) {
     if( typeof payload.schema !== 'string' ) {
       payload.schema = JSON.stringify(payload.schema);
     }
 
     if( !jwt ) jwt = config.pgr.jwt;
-    return request(`${config.pgr.host}/schemas`, {
+    let response = await request(`${config.pgr.host}/schemas`, {
       method : 'POST',
       body : JSON.stringify(payload),
       headers : {
@@ -140,24 +141,29 @@ class AdminPgr {
         Authorization : `Bearer ${jwt}`
       }
     });
+
+    if( response.statusCode != 201 ) {
+      return response;
+    }
+
+    await firebase.setSchema(payload);
+    return response;
   }
 
   /**
-   * @method listAppSchemas
+   * @method listSchemas
    * @description list all application schemas for crowd_input.data
    * 
    * @param {String} appId
    * 
    * @return {Promise} 
    */
-  listAppSchemas(appId) {
+  listSchemas(appId) {
     return request(`${config.pgr.host}/schemas?app_id=eq.${appId}`);
   }
 
-
-
   /**
-   * @method removeAppSchema
+   * @method removeSchema
    * @description remove schema from application
    * 
    * @param {String} appId 
@@ -166,15 +172,22 @@ class AdminPgr {
    * 
    * @returns {Promise} 
    */
-  removeAppSchema(appId, schemaId, jwt) {
+  async removeSchema(appId, schemaId, jwt) {
     if( !jwt ) jwt = config.pgr.jwt;
 
-    return request(`${config.pgr.host}/schemas?app_id=eq.${appId}&schema_id=eq.${schemaId}`, {
+    let response = await request(`${config.pgr.host}/schemas?app_id=eq.${appId}&schema_id=eq.${schemaId}`, {
       method : 'DELETE',
       headers : {
         Authorization : `Bearer ${jwt}`
       }
     });
+
+    if( response.statusCode != 204 ) {
+      return response;
+    }
+
+    await firebase.removeSchema(appId, schemaId);
+    return response;
   }
 
   /**

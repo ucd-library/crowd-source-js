@@ -1,4 +1,2 @@
 node_modules
-secrets.json
-service-account.json
-service-account.pub
+/secrets
