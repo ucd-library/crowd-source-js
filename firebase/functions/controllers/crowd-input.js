@@ -2,11 +2,38 @@ const router = require('express').Router();
 const crowdInput = require('../lib/crowd-input');
 
 router.post('/', (req, res) => {
+  if( !req.user ) return sendAuthError(res, 'No authentication provided');
+  
+  try {
+    let body = req.body;
+    if( !body ) throw new Error('Crowd input required in body');
 
+    await crowdInput.update(body);
+    res.json({success:true});
+  } catch(e) {
+    sendError(res, e);
+  }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
+  if( !req.user ) return sendAuthError(res, 'No authentication provided');
 
+  try {
+    let data = crowdInput.get(req.param.id);
+    if( !data ) throw new Error('Unknown crowd input id: '+req.param.id);
+
+    let body = req.body;
+    if( !body ) throw new Error('Crowd input required in body');
+
+    if( data.userId !== body.userId ) {
+      return sendAuthError(res, 'Unauthorized');
+    }
+
+    await crowdInput.update(body);
+    res.json({success:true});
+  } catch(e) {
+    sendError(res, e);
+  }
 });
 
 router.post('/:id/vote', (req, res) => {
@@ -31,6 +58,13 @@ router.post('/validate', (req, res) => {
     sendError(res, e);
   }
 });
+
+function sendAuthError(res, message) {
+  res.status(403).json({
+    error : true,
+    message
+  });
+}
 
 function sendError(res, e) {
   res.status(400).json({

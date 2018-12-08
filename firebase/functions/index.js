@@ -8,6 +8,7 @@ const presence = require('./lib/presence');
 
 const app = express();
 app.use(cors);
+app.use(require('./controllers/middleware').setUser);
 app.use(require('./controllers'));
 
 exports.api = functions.https.onRequest(app);

@@ -41,14 +41,27 @@ class CrowdInput {
     this.validator.validate(crowdInput.data, schema, {throwError: true});
   }
 
-  async create(data) {
-    this.verifyCrowdInputSchema(data);
-    admin.firestore().collection(config.collections.crowdInputs)
-      .set
+  get(id) {
+    let snapshot = await admin.firestore().collection(config.collections.crowdInputs)
+      .doc(id)
+      .get();
+
+    if( !snapshot.exists ) return null;
+    return snapshot.data();
   }
 
-  update(data) {
+  async update(data) {
+    await this.verifyCrowdInputSchema(data);
+    
+    return admin.firestore().collection(config.collections.crowdInputs)
+      .doc(data.id)
+      .set(data)
+  }
 
+  async delete(id) {
+    return admin.firestore().collection(config.collections.crowdInputs)
+      .doc(id)
+      .delete()
   }
 
 }
