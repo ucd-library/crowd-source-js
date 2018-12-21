@@ -6,5 +6,8 @@ const serviceAccount = require('../service-account');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+admin.firestore().settings({
+  timestampsInSnapshots: true
+});
 
 module.exports = admin;

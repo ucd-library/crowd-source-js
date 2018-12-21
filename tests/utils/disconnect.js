@@ -1,5 +1,5 @@
 const firestore = require('../../client/lib/firestore');
-const admin = require('../../admin/lib/firebase');
+const admin = require('../../admin');
 const data = require('./data');
 
 describe('Tear down and cleanup', function() {
@@ -21,7 +21,7 @@ describe('Tear down and cleanup', function() {
   describe('disconnect', function() {
     it('should disconnect from firestore so node process can exit', async function() {
       await firestore.db.disableNetwork();
-      await admin.firestore.disableNetwork();
+      // await admin.firebase.firestore.disableNetwork();
       // hack 
       setTimeout(() => process.exit(), 500);
     });

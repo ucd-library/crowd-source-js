@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const crowdInput = require('../lib/crowd-input');
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   if( !req.user ) return sendAuthError(res, 'No authentication provided');
   
   try {
@@ -19,14 +19,16 @@ router.put('/:id', async (req, res) => {
   if( !req.user ) return sendAuthError(res, 'No authentication provided');
 
   try {
-    let data = crowdInput.get(req.param.id);
-    if( !data ) throw new Error('Unknown crowd input id: '+req.param.id);
+    let data = await crowdInput.get(req.params.id);
+    if( !data ) throw new Error('Unknown crowd input id: '+req.params.id);
 
     let body = req.body;
     if( !body ) throw new Error('Crowd input required in body');
 
-    if( data.userId !== body.userId ) {
-      return sendAuthError(res, 'Unauthorized');
+    if( !req.user.claims.isAdmin ) {
+      if( data.userId !== body.userId || data.userId !== req.user.uid ) {
+        return sendAuthError(res, 'Unauthorized');
+      }
     }
 
     await crowdInput.update(body);
@@ -36,12 +38,42 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.post('/:id/vote', (req, res) => {
-  
+router.post('/:id/vote', async (req, res) => {
+  if( !req.user ) return sendAuthError(res, 'No authentication provided');
+
+  try {
+    let data = await crowdInput.get(req.params.id);
+    if( !data ) throw new Error('Unknown crowd input id: '+req.params.id);
+
+    let body = req.body;
+    if( !body ) throw new Error('Crowd input vote required in body');
+
+    if( !data.votes ) data.votes = {};
+    data.votes[req.user.uid] = body;
+
+    await crowdInput.update(data);
+    res.json({success:true});
+  } catch(e) {
+    sendError(res, e);
+  }
 });
 
-router.delete('/:id/vote', (req, res) => {
+router.delete('/:id/vote', async (req, res) => {
+  if( !req.user ) return sendAuthError(res, 'No authentication provided');
 
+  try {
+    let data = await crowdInput.get(req.params.id);
+    if( !data ) throw new Error('Unknown crowd input id: '+req.params.id);
+
+    if( data.votes && data.votes[req.user.id] ) {
+      delete data.votes[req.user.uid];
+      await crowdInput.update(data);
+    }
+    
+    res.json({success:true});
+  } catch(e) {
+    sendError(res, e);
+  }
 });
 
 router.post('/validate', (req, res) => {

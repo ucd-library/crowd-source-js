@@ -1,6 +1,6 @@
 // Generate items for test
 const _request = require('request');
-const admin = require('../../admin/lib/firebase');
+const admin = require('../../admin');
 const clientConfig = require('../../client/config');
 const config = require('../../admin/config');
 
@@ -53,8 +53,8 @@ class GenerateData {
 
   createSchema() {
     return {
-      schema_id : SCHEMA_ID,
-      app_id : APP_ID,
+      schemaId : SCHEMA_ID,
+      appId : APP_ID,
       schema : {
         "id": "/WineMark",
         "type": "object",
@@ -82,6 +82,7 @@ class GenerateData {
       collectionId : COLLECTION_ID,
       appId : APP_ID,
       itemId : ITEM_ID,
+      schemaId : SCHEMA_ID,
       userId,
       data : {
         name : 'foo',
@@ -144,16 +145,28 @@ class GenerateData {
   }
 
   async cleanupFirestore() {
-    let firestore = admin.firestore;
+    let firestore = admin.firebase.firestore;
     
-    let query = await firestore.db
+    let query = await firestore
       .collection(FIRESTORE_COLLECTIONS.crowdInputs)
       .where('appId', '==', APP_ID)
       .get()
 
     for( let doc of query.docs ) {
-      await firestore.db
+      await firestore
         .collection(FIRESTORE_COLLECTIONS.crowdInputs)
+        .doc(doc.id)
+        .delete()
+    }
+
+    query = await firestore
+      .collection(FIRESTORE_COLLECTIONS.schemas)
+      .where('appId', '==', APP_ID)
+      .get()
+
+    for( let doc of query.docs ) {
+      await firestore
+        .collection(FIRESTORE_COLLECTIONS.schemas)
         .doc(doc.id)
         .delete()
     }

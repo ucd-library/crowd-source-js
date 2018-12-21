@@ -12,12 +12,12 @@ describe('Crowd Input Data Schema', function() {
 
   describe('admin methods', async function() {
     it('should create schema', async function(){
-      let response = await pgr.addAppSchema(data.createSchema());
+      let response = await firebase.setSchema(data.createSchema());
       assert.equal(response.statusCode, 201);
     });
 
     it('should not let your create another schema with same id', async function(){
-      let response = await pgr.addAppSchema(data.createSchema());
+      let response = await firebase.setSchema(data.createSchema());
       assert.equal(response.statusCode, 409);
     });
 

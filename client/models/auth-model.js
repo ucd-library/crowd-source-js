@@ -32,7 +32,7 @@ class AuthModel extends BaseModel {
    */
   async userLogin(firebaseJwt, pgrJwt) {
     try {
-      await this.userLogin(firebaseJwt, pgrJwt);
+      await this.service.userLogin(firebaseJwt, pgrJwt);
     } catch(e) {}
 
     return this.store.getUser();

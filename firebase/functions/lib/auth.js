@@ -5,9 +5,10 @@ const config = require('../config');
 const secrets = require('../secrets');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
 
-const FIREBASE_PUBLIC_KEY = fs.readFileSync(path.join(__dirname, 'service-account.pub'), 'utf-8');
+const FIREBASE_PUBLIC_KEY = fs.readFileSync(path.resolve(__dirname, '..', 'service-account.pub'), 'utf-8');
 
 /**
  * Handle auth0 authentication and token minting

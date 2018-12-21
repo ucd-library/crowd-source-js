@@ -10,6 +10,7 @@ class CrowdInputsService extends BaseService {
 
     this.collection = config.firestore.collections.crowdInputs;
     this.store = CrowdInputsStore;
+    this.cloudFnConfig = config.firestore.cloudFunctions;
   }
 
   getApprovedByItem(id) {
@@ -90,6 +91,18 @@ class CrowdInputsService extends BaseService {
     await this.getApproved(id);
   }
 
+  // async removePending(id, jwt) {
+  //   return this.request({
+  //     url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/crowd-input/${id}`,
+  //     fetchOptions : {
+  //       method : 'DELETE',
+  //       headers : {Authorization: `Bearer ${jwt}`}
+  //     },
+  //     onLoading : request => this.store.setPendingDeleting(id, request),
+  //     onLoad : response => this.store.setPendingDeleted(id),
+  //     onError : error => this.store.setPendingDeleteError(id, error)
+  //   });
+  // }
   async removePending(id) {
     try {
       // setup firebase save 
@@ -103,44 +116,37 @@ class CrowdInputsService extends BaseService {
       await promise;
 
       // set loaded state
-      this.store.setPendingDeleted(crowdInput.id);
+      this.store.setPendingDeleted(id);
     } catch(e) {
-      this.store.setPendingDeleteError(crowdInput.id, e);
+      this.store.setPendingDeleteError(id, e);
       throw e;
     }
   }
 
-  async updatePending(crowdInput) {
-    try {
-      // setup firebase save 
-      let promise = firestore.db
-        .collection(this.collection)
-        .doc(crowdInput.id)
-        .set(crowdInput, {merge: true});
+  async updatePending(crowdInput, creating=false, jwt) {
+    let method = creating ? 'POST' : 'PUT';
+    let path = '/crowd-input' + (creating ? '' : `/${crowdInput.id}`); 
 
-      // set saving state and wait for save to complete
-      this.store.setPendingSaving(crowdInput, promise);
-      await promise;
-
-      // fetch the current state of document
-      let ref = await firestore.db
-        .collection(this.collection)
-        .doc(crowdInput.id)
-        .get();
-      crowdInput = ref.data();
-
-      // set loaded state
-      this.store.setPendingLoaded(crowdInput.id, crowdInput);
-
-      // update the item as well
-      this.store.mergePendingIntoItem(
-        crowdInput.itemId, 
-        {[crowdInput.id]: crowdInput}
-      );
-    } catch(e) {
-      this.store.setPendingSaveError(crowdInput, e);
-      throw e;
-    }
+    return this.request({
+      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}${path}`,
+      json : true,
+      fetchOptions : {
+        method,
+        body : crowdInput,
+        headers : {Authorization: `Bearer ${jwt}`}
+      },
+      onLoading : request => this.store.setPendingSaving(crowdInput, request),
+      onLoad : response => {
+        this.store.setPendingLoaded(crowdInput.id, crowdInput);
+        
+        // update the item as well
+        this.store.mergePendingIntoItem(
+          crowdInput.itemId, 
+          {[crowdInput.id]: crowdInput}
+        );
+      },
+      onError : error => this.store.setPendingSaveError(crowdInput, error)
+    });
   }
 
   async getPending(id) {
@@ -168,7 +174,7 @@ class CrowdInputsService extends BaseService {
 
   votePending(id, vote, jwt) {
     return this.request({
-      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/vote/${id}`,
+      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/crowd-input/${id}/vote`,
       json : true,
       fetchOptions : {
         method : 'POST',
@@ -180,7 +186,7 @@ class CrowdInputsService extends BaseService {
 
   removeVotePending(id, jwt) {
     return this.request({
-      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/vote/${id}`,
+      url : `${this.cloudFnConfig.host}${this.cloudFnConfig.rootPath}/crowd-input/${id}/vote`,
       json : true,
       fetchOptions : {
         method : 'DELETE',

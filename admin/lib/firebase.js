@@ -15,6 +15,7 @@ class Firebase {
     });
 
     this.firestore = admin.firestore();
+    this.firestore.settings({timestampsInSnapshots: true});
     this.admin = admin;
   }
 
@@ -43,14 +44,21 @@ class Firebase {
   }
 
   setSchema(payload) {
+    if( typeof payload.schema === 'object' ) {
+      payload.schema = JSON.stringify(payload.schema);
+    }
+
     return this.firestore.collection(this.config.collections.schemas)
-      .doc(payload.app_id+'-'+payload.schema_id)
-      .set({schema: payload.schema});
+      .doc(payload.appId+'-'+payload.schemaId)
+      .set(payload);
   }
 
-  listSchemas() {
-    return this.firestore.collection(this.config.collections.schemas)
+  async listSchemas() {
+    let querySnapshot = await this.firestore
+      .collection(this.config.collections.schemas)
       .get();
+
+    return (querySnapshot.docs || []).map(item => item.data());
   }
 
   removeSchema(appId, schemaId) {

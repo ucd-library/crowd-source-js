@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const auth = require('../lib/auth');
 
-router.use('/user-token', (req, res) => {
+router.use('/user-token', async (req, res) => {
   let auth0Jwt = req.body;
 
   if( !auth0Jwt ) {
@@ -21,7 +21,7 @@ router.use('/user-token', (req, res) => {
   }
 });
 
-router.use('/anonymous-tokens', (req, res) => {
+router.use('/anonymous-tokens', async (req, res) => {
   try {
     res.json(await auth.generateAnonymousTokens());
   } catch(e) {

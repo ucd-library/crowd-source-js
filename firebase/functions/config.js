@@ -3,7 +3,7 @@ module.exports = {
     jwksUrl : 'https://ucdlibrary.auth0.com/.well-known/jwks.json'
   },
   collections : {
-    schemas : 'scheams',
+    schemas : 'schemas',
     crowdInputs : 'crowd-inputs'
   }
 }

@@ -60,6 +60,18 @@ class AuthStore extends BaseStore {
     return this.data.tokens;
   }
 
+  getPgrToken() {
+    let state = this.getTokens();
+    if( state && state.payload ) return state.payload.pgr;
+    return null;
+  }
+
+  getFirebaseToken() {
+    let state = this.getTokens();
+    if( state && state.payload ) return state.payload.firebase;
+    return null;
+  }
+
   setTokensLoading(request) {
     let currentState = this.getTokens() || {};
     this._setTokenState({

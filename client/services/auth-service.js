@@ -6,6 +6,8 @@ const config = require('../config');
 class AuthService extends BaseService {
 
   constructor() {
+    super();
+    
     this.store = AuthStore;
     this.firebase = firestore.firebase;
     this.cloudFnConfig = config.firestore.cloudFunctions;

@@ -2,6 +2,9 @@
   "id": "/CrowdInput",
   "type": "object",
   "properties": {
+    "id" : {
+      "type" : "string"
+    },
     "appId" : {
       "type" : "string"
     },

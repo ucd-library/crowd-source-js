@@ -18,7 +18,7 @@ class CrowdInput {
    * 
    * @returns {Promise} resolves to null or schema object 
    */
-  _getSchema(appId, schemaId) {
+  async _getSchema(appId, schemaId) {
     let querySnapshot = await admin.firestore().collection(config.collections.schemas)
       .where('appId', '==', appId)
       .where('schemaId', '==', schemaId)
@@ -41,8 +41,9 @@ class CrowdInput {
     this.validator.validate(crowdInput.data, schema, {throwError: true});
   }
 
-  get(id) {
-    let snapshot = await admin.firestore().collection(config.collections.crowdInputs)
+  async get(id) {
+    let snapshot = await admin.firestore()
+      .collection(config.collections.crowdInputs)
       .doc(id)
       .get();
 

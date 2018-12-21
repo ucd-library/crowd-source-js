@@ -16,10 +16,12 @@ module.exports = {
     projectId : GOOGLE_PROJECT_ID,
     collections : {
       crowdInputs : 'crowd-inputs',
-      presence : 'presence'
+      presence : 'presence',
+      schemas : 'schemas'
     },
     cloudFunctions : {
       host : `https://us-central1-${GOOGLE_PROJECT_ID}.cloudfunctions.net`,
+      // host : 'http://localhost:5000/price-the-vintage-dams/us-central1',
       rootPath : '/api',
       methods : {
         userTokens : 'user-tokens',

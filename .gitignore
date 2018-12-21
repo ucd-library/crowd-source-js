@@ -1,3 +1,6 @@
 node_modules
 /secrets/*
 !/secrets/README.md
+service-account.json
+service-account.pub
+secrets.json

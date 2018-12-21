@@ -1,5 +1,7 @@
 const assert = require('assert');
 const model = require('../../client/models/crowd-inputs-model');
+const auth = require('../../client/models/auth-model');
+const admin = require('../../admin')
 const firestore = require('../../client/lib/firestore');
 const data = require('../utils/data');
 
@@ -8,12 +10,28 @@ let crowdInput;
 
 describe('Crowd Inputs: Pending', function() {
 
-  before(async () => {
-    await firestore.signIn(Users.alice.firestoreJwt);
+  before(async function() {
+    await auth.userLogin(
+      Users.alice.firestoreJwt,
+      Users.alice.pgrJwt
+    );
+  });
+
+  describe('set testing schema', async function(){
+    let schema = data.createSchema();
+    
+    try {
+      await admin.firebase.setSchema(schema);
+      assert.equal(true, true);
+    } catch(e) {
+      assert.equal(e, null, 'Failed to write schema');
+    }
   });
 
   describe('create', async function() {
-    it('should let alice add a pending crowd input', async function(){
+    it('should let alice add a pending crowd input', async function() {
+      this.timeout(10000);
+
       crowdInput = data.createCrowdInput(Users.alice.userId);
       let state = await model.addPending(crowdInput);
 
@@ -27,14 +45,11 @@ describe('Crowd Inputs: Pending', function() {
 
 
     it('should let alice update a pending crowd input', async function(){
-      let state = await model.updatePending({
-        id : crowdInput.id,
-        data : {
-          testUpdate : 'updated'
-        }
-      });
+      this.timeout(10000);
       
-      crowdInput.data.testUpdate = 'updated';
+      crowdInput.data.type = 'red'
+      let state = await model.updatePending(crowdInput);
+    
       assert.deepEqual({
         id : state.id,
         payload: crowdInput,
@@ -58,7 +73,9 @@ describe('Crowd Inputs: Pending', function() {
     });
 
     it('should let alice delete a pending crowd input', async function(){
+      await firestore.signIn(Users.alice.firestoreJwt);
       let state = await model.removePending(crowdInput.id);
+
       assert.equal(state.state, 'loaded');
       assert.equal(state.deleted, true);
     });

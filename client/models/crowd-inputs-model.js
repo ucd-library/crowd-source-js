@@ -79,7 +79,7 @@ class CrowdInputsModel extends BaseModel {
     delete crowdInput.id;
 
     if( !jwt ) {
-      jwt = AuthStore.getTokens().pgr;
+      jwt = AuthStore.getPgrToken();
     }
     
     try {
@@ -97,9 +97,13 @@ class CrowdInputsModel extends BaseModel {
    *
    * @returns {Promise} 
    */
-  async removePending(id) {
+  async removePending(id, jwt) {
+    if( !jwt ) {
+      jwt = AuthStore.getFirebaseToken();
+    }
+
     try {
-      await this.service.removePending(id);
+      await this.service.removePending(id, jwt);
     } catch(e) {}
 
     return this.store.getPending(id);
@@ -120,7 +124,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @return {Promise}
    */
-  async updatePending(crowdInput) {
+  async updatePending(crowdInput, jwt) {
     if( !crowdInput.id ) {
       throw new Error('Crowd input id required');
     }
@@ -132,8 +136,12 @@ class CrowdInputsModel extends BaseModel {
       delete crowdInput.votes;
     }
 
+    if( !jwt ) {
+      jwt = AuthStore.getFirebaseToken();
+    }
+
     try {
-      await this.service.updatePending(crowdInput);
+      await this.service.updatePending(crowdInput, false, jwt);
     } catch(e) {}
 
     return this.store.getPending(crowdInput.id);
@@ -153,7 +161,7 @@ class CrowdInputsModel extends BaseModel {
    * 
    * @return {Promise}
    */
-  async addPending(crowdInput) {
+  async addPending(crowdInput, jwt) {
     crowdInput.id = uuid.v4();
     
     if( !crowdInput.collectionId ) {
@@ -173,8 +181,12 @@ class CrowdInputsModel extends BaseModel {
       throw new Error('data required');
     }
 
+    if( !jwt ) {
+      jwt = AuthStore.getFirebaseToken();
+    }
+
     try {
-      await this.service.updatePending(crowdInput);
+      await this.service.updatePending(crowdInput, true, jwt);
     } catch(e) {}
 
     return this.store.getPending(crowdInput.id);
@@ -209,7 +221,7 @@ class CrowdInputsModel extends BaseModel {
   }
 
   async votePending(id, vote, jwt) {
-    if( !jwt ) jwt = AuthStore.getTokens().firebase;
+    if( !jwt ) jwt = AuthStore.getFirebaseToken();
     if( typeof vote !== 'object' ) {
       vote = {vote};
     }
@@ -219,7 +231,7 @@ class CrowdInputsModel extends BaseModel {
   }
 
   async removeVotePending(id, jwt) {
-    if( !jwt ) jwt = AuthStore.getTokens().firebase;
+    if( !jwt ) jwt = AuthStore.getFirebaseToken();
     await this.service.removeVotePending(id, jwt);
     return this.getPending(id, true);
   }
