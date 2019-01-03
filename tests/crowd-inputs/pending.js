@@ -15,17 +15,7 @@ describe('Crowd Inputs: Pending', function() {
       Users.alice.firestoreJwt,
       Users.alice.pgrJwt
     );
-  });
-
-  describe('set testing schema', async function(){
-    let schema = data.createSchema();
-    
-    try {
-      await admin.firebase.setSchema(schema);
-      assert.equal(true, true);
-    } catch(e) {
-      assert.equal(e, null, 'Failed to write schema');
-    }
+    await admin.firebase.setSchema(data.createSchema());
   });
 
   describe('create', async function() {
@@ -78,6 +68,11 @@ describe('Crowd Inputs: Pending', function() {
 
       assert.equal(state.state, 'loaded');
       assert.equal(state.deleted, true);
+    });
+
+    after(async function() {
+      let schema = data.createSchema();
+      await admin.firebase.removeSchema(schema.appId, schema.schemaId);
     });
 
   });

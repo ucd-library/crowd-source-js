@@ -1,53 +1,45 @@
 const assert = require('assert');
-const pgr = require('../admin/lib/pgr');
-const firebase = require('../admin/lib/firebase');
+const admin = require('../admin');
 const data = require('./utils/data');
 
 describe('Crowd Input Data Schema', function() {
 
-  before(async () => {
-    pgr.config.jwt = Users.admin.pgrJwt;
-    await pgr.createApp(data.createApp());
-  });
+  // before(async () => {
+  //   await pgr.createApp(data.createApp());
+  // });
 
   describe('admin methods', async function() {
     it('should create schema', async function(){
-      let response = await firebase.setSchema(data.createSchema());
-      assert.equal(response.statusCode, 201);
+      try {
+        await admin.firebase.setSchema(data.createSchema());
+        assert.equal(true, true);
+      } catch(e) {
+        assert.equal(e, null, 'Failed to write schema');
+      }
     });
 
-    it('should not let your create another schema with same id', async function(){
-      let response = await firebase.setSchema(data.createSchema());
-      assert.equal(response.statusCode, 409);
+    it('should get schema', async function(){
+      let schema = data.createSchema();
+      schema = await admin.firebase.getSchema(schema.appId, schema.schemaId);
+      assert.notEqual(schema, null);
     });
 
     it('should list application schema', async function(){
-      let response = await pgr.listAppSchemas(data.createSchema().app_id);
-      assert.equal(response.statusCode, 200);
-      let body = JSON.parse(response.body);
-      assert.equal(body.length > 0, true);
-
-      let querySnaphsot = await firebase.listSchemas();
-      for( let doc of querySnaphsot.docs ){
-        console.log(doc.data);
-      }
-      assert.equal(querySnaphsot.docs.length > 0, true);
+      let schemas = await admin.firebase.listSchemas();
+      assert.equal(schemas.length > 0, true);
     });
 
     it('should remove schema', async function(){
       let schema = data.createSchema();
-      let response = await pgr.removeAppSchema(schema.app_id, schema.schema_id);
-      assert.equal(response.statusCode, 204);
-
-      let querySnaphsot = await firebase.listSchemas();
-      for( let doc of querySnaphsot.docs ){
-        console.log(doc.data);
-      }
+      await admin.firebase.removeSchema(schema.appId, schema.schemaId);
+      
+      schema = await admin.firebase.getSchema(schema.appId, schema.schemaId);
+      assert.equal(schema, null);
     });
 
   });
 
-  after(async () => {
-    await pgr.removeApp(data.createApp().app_id);
-  });
+  // after(async () => {
+  //   await pgr.removeApp(data.createApp().app_id);
+  // });
 });

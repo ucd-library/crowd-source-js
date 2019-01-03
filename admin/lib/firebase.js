@@ -61,6 +61,17 @@ class Firebase {
     return (querySnapshot.docs || []).map(item => item.data());
   }
 
+  async getSchema(appId, schemaId) {
+    let item = await this.firestore
+      .collection(this.config.collections.schemas)
+      .doc(appId+'-'+schemaId)
+      .get();
+
+    if( !item.exists ) return null;
+    return item.data();
+  }
+
+
   removeSchema(appId, schemaId) {
     return this.firestore.collection(this.config.collections.schemas)
       .doc(appId+'-'+schemaId)
