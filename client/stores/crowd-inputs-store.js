@@ -33,7 +33,7 @@ class CrowdInputsStore extends BaseStore {
 
   // APPROVED
   getApproved(id) {
-    return this.data.approved.byId[id]  
+    return this.data.approved.byId[id];
   }
 
   setApprovedLoading(id, promise) {
@@ -59,6 +59,7 @@ class CrowdInputsStore extends BaseStore {
   }
 
   _setApprovedState(newState) {
+    console.log(newState);
     let oldState = this.getPendingByItem(newState.id);
     if( !this.stateChanged(oldState, newState) ) {
       return;
@@ -176,10 +177,10 @@ class CrowdInputsStore extends BaseStore {
 
   setPendingApproving(data, promise) {
     // keep track of current payload if we have it
-    let currentState = this.getPending(data.id) || {};
+    let currentState = this.getPending(data.crowd_input_id) || {};
 
     this._setPendingState({
-      id : data.id,
+      id : data.crowd_input_id,
       payload : currentState.payload,
       approvePayload : data,
       request : promise,
@@ -189,10 +190,10 @@ class CrowdInputsStore extends BaseStore {
 
   setPendingApproved(data, body) {
     // keep track of current payload if we have it
-    let currentState = this.getPending(data.id) || {};
+    let currentState = this.getPending(data.crowd_input_id) || {};
 
     this._setPendingState({
-      id : data.id,
+      id : data.crowd_input_id,
       payload : currentState.payload,
       approvePayload : data,
       body,

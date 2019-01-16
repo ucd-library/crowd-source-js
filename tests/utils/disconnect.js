@@ -9,9 +9,9 @@ describe('Tear down and cleanup', function() {
   });
 
   describe('cleanup', function() {
-    it('remove test items / collections from PGR', async function() {
-      await data.cleanupPgr();
-    });
+    // it('remove test items / collections from PGR', async function() {
+    //   await data.cleanupPgr();
+    // });
 
     it('remove test crowd inputs from Firestore', async function() {
       await data.cleanupFirestore();

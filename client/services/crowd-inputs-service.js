@@ -41,7 +41,7 @@ class CrowdInputsService extends BaseService {
    */
   getApproved(id, onlySuccessState=false) {
     return this.request({
-      url : `${config.pgr.host}/crowd_inputs?crowd_inputs_id=eq.${id}`,
+      url : `${config.pgr.host}/crowd_inputs?crowd_input_id=eq.${id}`,
       onLoading : request => {
         if( onlySuccessState ) return;
         this.store.setApprovedLoading(id, request);
@@ -70,7 +70,7 @@ class CrowdInputsService extends BaseService {
   }
 
   async setApproved(crowdInput, jwt) {
-    await this.request({
+    let {response, body} = await this.request({
       url : `${config.pgr.host}/crowd_inputs`,
       json : true,
       fetchOptions : {
@@ -83,12 +83,13 @@ class CrowdInputsService extends BaseService {
       },
       onLoading : request => this.store.setPendingApproving(crowdInput, request),
       onLoad : response => this.store.setPendingApproved(crowdInput, response.body),
-      onError : error => this.store.setPendingError(id, error)
+      onError : error => this.store.setPendingError(crowdInput.crowd_input_id, error)
     });
+    console.log(response.status, body);
 
-    await this.removePending(id);
+    await this.removePending(crowdInput.crowd_input_id);
 
-    await this.getApproved(id);
+    await this.getApproved(crowdInput.crowd_input_id);
   }
 
   // async removePending(id, jwt) {

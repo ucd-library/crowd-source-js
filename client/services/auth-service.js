@@ -27,9 +27,9 @@ class AuthService extends BaseService {
     });
   }
 
-  userLogin(firebaseJwt, pgrJwt) {
+  async userLogin(firebaseJwt, pgrJwt) {
     this.store.setTokensLoaded(firebaseJwt, pgrJwt);
-    return this.firebase.auth().signIn(firebaseJwt);
+    await this.firebase.auth().signInWithCustomToken(firebaseJwt);
   }
 
   logout() {

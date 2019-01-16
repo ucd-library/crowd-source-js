@@ -6,6 +6,15 @@ const uuid = require('uuid');
 const config = require('../config');
 const clone = require('clone');
 
+const FB_TO_PGR_MAP = {
+  id : 'crowd_input_id',
+  appId : 'app_id',
+  collectionId : 'collection_id',
+  itemId : 'item_id',
+  schemaId : 'schema_id',
+  userId : 'user_id'
+}
+
 class CrowdInputsModel extends BaseModel {
 
   constructor() {
@@ -63,10 +72,9 @@ class CrowdInputsModel extends BaseModel {
    * Moves mark from Firestore to PGR
    * 
    * @param {String} id 
-   * @param {String} schema schema type.  Required for PGR which will validate the crowdInput.data object
    * @param {String} jwt Optional. pgr admin jwt. Defaults to AuthModel pgr token
    */
-  async setApproved(id, schema, jwt) {
+  async setApproved(id, jwt) {
     let crowdInput = await this.getPending(id);
     if( crowdInput.state === this.store.STATE.ERROR ) {
       throw crowdInput.error;
@@ -74,17 +82,21 @@ class CrowdInputsModel extends BaseModel {
 
     // change id for pgr
     crowdInput = clone(crowdInput.payload);
-    crowdInput.crowd_input_id = crowdInput.id;
-    crowdInput.data['@schema'] = schema;
-    delete crowdInput.id;
-
+    crowdInput.data = JSON.stringify(crowdInput.data);
+    for( let key in FB_TO_PGR_MAP ) {
+      crowdInput[FB_TO_PGR_MAP[key]] = crowdInput[key];
+      delete crowdInput[key];
+    }
+    
     if( !jwt ) {
       jwt = AuthStore.getPgrToken();
     }
     
     try {
       await this.service.setApproved(crowdInput, jwt);
-    } catch(e) {}
+    } catch(e) {
+      console.log('here', e);
+    }
 
     return this.store.getApproved(id);
   }
@@ -217,13 +229,13 @@ class CrowdInputsModel extends BaseModel {
       } catch(e) {}
     }
 
-    this.store.getPending(id);
+    return this.store.getPending(id);
   }
 
   async votePending(id, vote, jwt) {
     if( !jwt ) jwt = AuthStore.getFirebaseToken();
     if( typeof vote !== 'object' ) {
-      vote = {vote};
+      vote = {value: vote};
     }
 
     await this.service.votePending(id, vote, jwt);

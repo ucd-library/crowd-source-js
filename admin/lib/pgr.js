@@ -191,19 +191,6 @@ class AdminPgr {
   }
 
   /**
-   * @method createAppItemId
-   * @description create the item's table uid from appId and itemId
-   * 
-   * @param {String} appId 
-   * @param {String} itemId 
-   * 
-   * @returns {String}
-   */
-  createAppItemId(appId, itemId) {
-    return appId+':/'+itemId;
-  }
-
-  /**
    * @method addItem
    * @description add item
    * 
@@ -225,16 +212,12 @@ class AdminPgr {
     }
 
     let payload = {
-      app_item_id : this.createAppItemId(item.app_id, item.item_id),
       app_id : item.app_id,
       collection_id : item.collection_id,
       item_id : item.item_id,
       editable : options.editable !== undefined ? options.editable : true,
       completed : options.completed !== undefined ? options.completed : true,
       index : options.index !== undefined ? options.index : -1
-    }
-    if( item.parent_item_id ) {
-      payload.parent_id = this.createAppItemId(item.app_id, item.parent_item_id);
     }
     if( !jwt ) jwt = config.pgr.jwt;
 
@@ -253,7 +236,6 @@ class AdminPgr {
   }
 
   async listChildItems(appId, parentItemId) {
-    let parentId = this.createAppItemId(appId, parentItemId);
     return request(`${config.pgr.host}/items?app_id=eq.${appId}&parent_id=eq.${encodeURIComponent(parentId)}`);
   }
 

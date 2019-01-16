@@ -9,7 +9,7 @@ module.exports = {
   },
   
   pgr : {
-    host : 'http://localhost:3000'
+    host : 'http://localhost:6080'
   },
 
   firestore : {

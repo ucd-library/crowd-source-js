@@ -124,6 +124,16 @@ class GenerateData {
     );
 
     await request(
+      `${config.pgr.host}/crowd_inputs?app_id=eq.${APP_ID}`,
+      {
+        method : 'DELETE',
+        headers : {
+          Authorization : `Bearer ${Users.admin.pgrJwt}`
+        }
+      }
+    );
+
+    await request(
       `${config.pgr.host}/collections?collection_id=eq.${COLLECTION_ID}`,
       {
         method : 'DELETE',

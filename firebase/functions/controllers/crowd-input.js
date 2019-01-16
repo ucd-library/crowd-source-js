@@ -65,7 +65,7 @@ router.delete('/:id/vote', async (req, res) => {
     let data = await crowdInput.get(req.params.id);
     if( !data ) throw new Error('Unknown crowd input id: '+req.params.id);
 
-    if( data.votes && data.votes[req.user.id] ) {
+    if( data.votes && data.votes[req.user.uid] ) {
       delete data.votes[req.user.uid];
       await crowdInput.update(data);
     }

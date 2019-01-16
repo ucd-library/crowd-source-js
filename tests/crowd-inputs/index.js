@@ -1,1 +1,3 @@
-require('./pending');
+// require('./pending');
+// require('./vote');
+require('./approve');

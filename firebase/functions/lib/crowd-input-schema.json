@@ -25,6 +25,9 @@
     },
     "schemaId" : {
       "type" : "string"
+    },
+    "votes" : {
+      "type" : "object"
     }
   },
   "additionalProperties": false,
